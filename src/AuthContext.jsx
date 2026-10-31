@@ -5,58 +5,68 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
+  const [authReady, setAuthReady] = useState(false)
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [profileFor, setProfileFor] = useState(null) // user id whose profile has been loaded
 
-  // Load the profile row; if it doesn't exist yet (e.g. email confirmation was on
-  // at sign-up), create it from the details saved in the user's metadata.
-  async function loadProfile(user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle()
-    if (data) return setProfile(data)
+  const user = session?.user ?? null
 
-    const meta = user.user_metadata || {}
-    const { data: created } = await supabase
-      .from('profiles')
-      .insert({
-        id: user.id,
-        full_name: meta.full_name ?? null,
-        course: meta.course ?? null,
-        year_level: meta.year_level ?? null,
-      })
-      .select()
-      .single()
-    setProfile(created ?? null)
-  }
-
+  // 1. Track the auth session only (no database calls in this callback)
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, newSession) => {
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
-      if (!newSession) {
-        setProfile(null)
-        setLoading(false)
-        return
-      }
-      if (event === 'TOKEN_REFRESHED') return
-      // Defer Supabase calls out of the callback to avoid auth deadlocks
-      setTimeout(async () => {
-        await loadProfile(newSession.user)
-        setLoading(false)
-      }, 0)
+      setAuthReady(true)
     })
     return () => subscription.unsubscribe()
   }, [])
 
+  // 2. Load the profile once a user is known
+  useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      setProfileFor(null)
+      return
+    }
+    let cancelled = false
+
+    async function load() {
+      const { data, error } = await supabase
+        .from('profiles').select('*').eq('id', user.id).maybeSingle()
+      if (error) console.error('Profile select failed:', error.message)
+
+      let row = data
+      if (!row && !error) {
+        const meta = user.user_metadata || {}
+        const res = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            full_name: meta.full_name ?? null,
+            course: meta.course ?? null,
+            year_level: meta.year_level ?? null,
+          })
+          .select().single()
+        if (res.error) console.error('Profile insert failed:', res.error.message)
+        row = res.data
+      }
+      if (!cancelled) {
+        setProfile(row ?? null)
+        setProfileFor(user.id)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [user?.id])
+
   const value = {
     session,
-    user: session?.user ?? null,
+    user,
     profile,
-    loading,
+    setProfile,
+    loading: !authReady || (!!user && profileFor !== user.id),
     signOut: () => supabase.auth.signOut(),
   }
 
