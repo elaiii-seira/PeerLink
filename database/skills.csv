@@ -1,0 +1,41 @@
+id,name,category
+1,College Algebra,academic
+2,Trigonometry,academic
+3,Calculus,academic
+4,Statistics,academic
+5,Physics,academic
+6,Chemistry,academic
+7,Engineering Drawing,academic
+8,Circuit Analysis,academic
+9,Digital Logic Design,academic
+10,Electronics,academic
+11,Programming Fundamentals,academic
+12,Data Structures and Algorithms,academic
+13,Object-Oriented Programming,academic
+14,Database Systems,academic
+15,Computer Networks,academic
+16,Operating Systems,academic
+17,Technical Writing,academic
+18,Engineering Economics,academic
+19,Thesis Writing,academic
+20,English Communication,academic
+21,Canva,practical
+22,Video Editing,practical
+23,Photo Editing,practical
+24,Graphic Design,practical
+25,Python,practical
+26,JavaScript,practical
+27,HTML and CSS,practical
+28,React,practical
+29,Git and GitHub,practical
+30,Microsoft Excel,practical
+31,PowerPoint Design,practical
+32,Public Speaking,practical
+33,Arduino,practical
+34,Resume Writing,practical
+35,Note-taking,practical
+36,Time Management,practical
+37,UI/UX Design,practical
+38,Basic SQL,practical
+39,Content Writing,practical
+40,Social Media Management,practical
