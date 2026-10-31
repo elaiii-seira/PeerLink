@@ -24,7 +24,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Register, login, logout, protected pages | Done |
 | Dashboard | Done |
 | Profile editing, teach/learn tags, availability | Done |
-| Browse, search and filters, suggested peers | Planned |
+| Browse, search and filters, suggested peers | Done |
 | Session scheduling and weekly calendar | Planned |
 | In-app chat with attachments | Planned |
 | Study groups | Planned |
@@ -35,6 +35,16 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 - `profiles`: id (links to auth user), full_name, course, year_level, bio, availability (text array)
 - `skills`: id, name, category (`academic` or `practical`). One shared catalog, so subjects and skills use the same tagging system. Seed data is in `database/skills.csv`.
 - `user_skills`: id, user_id (links to profiles), skill_id (links to skills), type (`teach` or `learn`)
+
+## Matching
+
+Suggestions compare your tags with every other student's (`src/peers.js`):
+
+- **Can teach you**: they teach a skill you want to learn.
+- **Wants to learn from you**: they want to learn a skill you teach.
+- **Mutual match**: both are true. Mutual matches always rank first, then students with more overlapping skills, then those with more shared availability slots.
+
+The Browse page filters by search text (name, course, skill), subject or skill, category, availability, course, and year level. Filters are kept in the URL, so a filtered view survives a refresh and can be linked to.
 
 CRUD in the app: create and delete skill tags, read the catalog and tags, update profile details.
 
@@ -60,9 +70,9 @@ Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requ
 
 ```
 src/
-  components/   AuthShell, PageHeader, RouteGuards
-  pages/        Login, Register, Dashboard, Profile
-  AuthContext.jsx, supabase.js, options.js
+  components/   AuthShell, PageHeader, PeerCard, RouteGuards
+  pages/        Login, Register, Dashboard, Profile, Browse
+  AuthContext.jsx, supabase.js, options.js, peers.js
   App.jsx, main.jsx, index.css
-database/       skills seed data
+database/       skills seed data, demo classmates script
 ```
