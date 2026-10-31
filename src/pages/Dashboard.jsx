@@ -1,4 +1,8 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
+import { supabase } from '../supabase'
+import PageHeader from '../components/PageHeader'
 
 function Section({ title, children }) {
   return (
@@ -18,28 +22,30 @@ function Row({ label, value }) {
   )
 }
 
+const plural = (n) => `${n} ${n === 1 ? 'skill' : 'skills'}`
+
 export default function Dashboard() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile } = useAuth()
+  const [counts, setCounts] = useState({ teach: 0, learn: 0 })
+
+  useEffect(() => {
+    supabase.from('user_skills').select('type').eq('user_id', user.id)
+      .then(({ data }) => {
+        if (!data) return
+        setCounts({
+          teach: data.filter((r) => r.type === 'teach').length,
+          learn: data.filter((r) => r.type === 'learn').length,
+        })
+      })
+  }, [user.id])
+
   const fullName = profile?.full_name || user?.user_metadata?.full_name || 'there'
   const firstName = fullName.split(' ')[0]
 
   return (
     <div className="min-h-screen">
-      <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-          <span className="font-heading text-xl font-semibold">PeerLink</span>
-          <button onClick={signOut}
-            className="rounded border border-primary-foreground/40 px-3 py-1.5 text-sm font-semibold hover:bg-primary-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground">
-            Log out
-          </button>
-        </div>
-        <div className="mx-auto max-w-5xl px-6 pb-12 pt-6">
-          <h1 className="text-4xl font-semibold sm:text-5xl">Welcome, {firstName}.</h1>
-          <p className="mt-3 max-w-xl text-lg text-primary-foreground/80">
-            Your hub for tutoring, study groups, and skill swaps with classmates.
-          </p>
-        </div>
-      </header>
+      <PageHeader title={`Welcome, ${firstName}.`}
+        subtitle="Your hub for tutoring, study groups, and skill swaps with classmates." />
 
       <main className="mx-auto grid max-w-5xl gap-6 px-6 py-10 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
@@ -59,9 +65,10 @@ export default function Dashboard() {
               <Row label="Course" value={profile?.course} />
               <Row label="Year level" value={profile?.year_level} />
               <Row label="Email" value={user?.email} />
-              <Row label="Can teach" value="0 skills" />
-              <Row label="Want to learn" value="0 skills" />
+              <Row label="Can teach" value={plural(counts.teach)} />
+              <Row label="Want to learn" value={plural(counts.learn)} />
             </dl>
+            <Link to="/profile" className="btn-outline mt-4 w-full">Edit profile</Link>
           </section>
         </aside>
       </main>
