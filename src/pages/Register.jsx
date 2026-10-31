@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import AuthShell from '../components/AuthShell'
-
-const YEAR_LEVELS = ['1st year', '2nd year', '3rd year', '4th year', '5th year']
+import { YEAR_LEVELS } from '../options'
 
 export default function Register() {
   const navigate = useNavigate()
