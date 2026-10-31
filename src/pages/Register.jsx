@@ -36,7 +36,6 @@ export default function Register() {
     }
 
     if (data.session) {
-      await supabase.from('profiles').insert({ id: data.user.id, full_name, course, year_level })
       setBusy(false)
       navigate('/dashboard')
     } else {
