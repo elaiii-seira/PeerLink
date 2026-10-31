@@ -16,6 +16,7 @@ export default function PageHeader({ title, subtitle }) {
         <span className="font-heading text-xl font-semibold">PeerLink</span>
         <nav className="flex items-center gap-6">
           <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>
+          <NavLink to="/browse" className={navClass}>Browse</NavLink>
           <NavLink to="/profile" className={navClass}>Profile</NavLink>
           <button
             onClick={signOut}

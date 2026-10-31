@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
+import Browse from './pages/Browse'
 
 export default function App() {
   return (
@@ -13,7 +14,8 @@ export default function App() {
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/browse" element={<ProtectedRoute><Browse /></ProtectedRoute>} />
+      <Route path="*"element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
 }
