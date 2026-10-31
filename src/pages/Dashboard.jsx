@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
-import { supabase } from '../supabase'
 import PageHeader from '../components/PageHeader'
+import PeerCard from '../components/PeerCard'
+import { isMatch, usePeers } from '../peers'
 
 function Section({ title, children }) {
   return (
@@ -26,18 +26,10 @@ const plural = (n) => `${n} ${n === 1 ? 'skill' : 'skills'}`
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
-  const [counts, setCounts] = useState({ teach: 0, learn: 0 })
-
-  useEffect(() => {
-    supabase.from('user_skills').select('type').eq('user_id', user.id)
-      .then(({ data }) => {
-        if (!data) return
-        setCounts({
-          teach: data.filter((r) => r.type === 'teach').length,
-          learn: data.filter((r) => r.type === 'learn').length,
-        })
-      })
-  }, [user.id])
+  const { loading, me, peers } = usePeers(user.id)
+  const counts = { teach: me?.teach.length ?? 0, learn: me?.learn.length ?? 0 }
+  const hasTags = counts.teach + counts.learn > 0
+  const suggested = peers.filter(isMatch).slice(0, 2)
 
   const fullName = profile?.full_name || user?.user_metadata?.full_name || 'there'
   const firstName = fullName.split(' ')[0]
@@ -53,7 +45,26 @@ export default function Dashboard() {
             <p>No sessions yet. Once you match with a peer, confirmed sessions will appear here.</p>
           </Section>
           <Section title="Suggested peers">
-            <p>Add what you can teach and what you want to learn, and matching classmates will appear here.</p>
+            {loading ? (
+              <p>Finding matches…</p>
+            ) : !hasTags ? (
+              <p>
+                <Link to="/profile" className="font-semibold text-foreground underline">Add what you can teach and want to learn</Link>{' '}
+                and matching classmates will appear here.
+              </p>
+            ) : suggested.length === 0 ? (
+              <p>
+                No matches yet.{' '}
+                <Link to="/browse" className="font-semibold text-foreground underline">Browse all classmates</Link>
+              </p>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {suggested.map((p) => <PeerCard key={p.id} peer={p} compact />)}
+                </div>
+                <Link to="/browse" className="btn-outline mt-4">See all matches</Link>
+              </>
+            )}
           </Section>
         </div>
 
