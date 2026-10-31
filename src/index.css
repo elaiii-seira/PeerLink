@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Design tokens: space-separated RGB channels so opacity classes (bg-primary/80) work */
+  :root {
+    --background: 241 245 249;          /* #F1F5F9 */
+    --foreground: 15 23 42;             /* #0F172A */
+    --card: 255 255 255;                /* #FFFFFF */
+    --card-foreground: 15 23 42;        /* #0F172A */
+    --primary: 30 41 59;                /* #1E293B */
+    --primary-foreground: 255 255 255;  /* #FFFFFF */
+    --muted: 241 245 249;               /* #F1F5F9 */
+    --muted-foreground: 100 116 139;    /* #64748B */
+    --border: 100 116 139;              /* #64748B, used with opacity */
+    --ring: 15 23 42;                   /* #0F172A */
+    --destructive: 185 28 28;           /* #B91C1C, only for errors */
+    --destructive-foreground: 255 255 255;
+    --radius: 0.5rem;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-foreground;
+  }
+  .field {
+    @apply w-full rounded border border-border/40 bg-card px-3 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded bg-primary px-4 py-2.5 font-semibold text-primary-foreground hover:bg-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded border border-border/40 bg-card px-4 py-2 font-semibold text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  }
+}
