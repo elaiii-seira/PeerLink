@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabase'
 import PageHeader from '../components/PageHeader'
+import ProfileActivity from '../components/ProfileActivity'
 import { AVAILABILITY, YEAR_LEVELS } from '../options'
 
 const MINE = 'id, type, skill_id, skills(name, category)'
@@ -198,6 +199,8 @@ export default function Profile() {
           <SkillList title="I want to learn" hint="What you would like a classmate to help you with."
             type="learn" mine={mine} catalog={catalog} onAdd={addSkill} onRemove={removeSkill} />
         </div>
+
+        <ProfileActivity userId={user.id} />
       </main>
     </div>
   )
