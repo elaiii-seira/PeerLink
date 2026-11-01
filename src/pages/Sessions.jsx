@@ -155,6 +155,10 @@ function Details({ s }) {
   )
 }
 
+const messageLink = (s) => (
+  <Link key="msg" to={`/chat/${s.other.id}`} className="btn-outline">Message</Link>
+)
+
 function Item({ children, actions }) {
   return (
     <li className="flex flex-wrap items-start justify-between gap-3 border-t border-border/25 py-4 first:border-t-0 first:pt-0">
@@ -243,7 +247,7 @@ export default function Sessions() {
               ) : (
                 <ul className="mt-4">
                   {next.map((s) => (
-                    <Item key={s.id} actions={button(s, 'cancelled', 'Cancel')}>
+                    <Item key={s.id} actions={<>{messageLink(s)}{button(s, 'cancelled', 'Cancel')}</>}>
                       <Details s={s} />
                       <p className="mt-1 text-sm font-semibold">Starts {startsIn(s.start)}</p>
                     </Item>
