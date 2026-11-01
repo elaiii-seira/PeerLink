@@ -97,8 +97,8 @@ CRUD in the app: create and delete skill tags, read the catalog and tags, update
 
 Create a Supabase project, then prepare the database in this order (SQL Editor, or the dashboard forms where noted):
 
-1. The `profiles`, `skills` and `user_skills` tables with their row level security policies and the sign-up trigger that creates a profile (described under Database above). Import `database/skills.csv` into `skills`.
-2. `database/constraints.sql`: blocks duplicate skill tags.
+1. `database/setup.sql`: the `profiles`, `skills` and `user_skills` tables with their row level security policies (the app creates each profile row at registration, so no sign-up trigger is needed). Then import `database/skills.csv` into `skills`.
+2. `database/constraints.sql`: blocks duplicate skill tags (optional safeguard).
 3. `database/sessions.sql`: sessions table and policies.
 4. `database/chat.sql`: messages table, the private `chat-attachments` bucket and its policies.
 5. `database/groups.sql`: study group tables and policies.
@@ -151,5 +151,5 @@ src/
   pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
   AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js, ratings.js
   App.jsx, main.jsx, index.css
-database/       skills seed data, demo classmates script, constraints, and the sessions, chat, study groups and ratings scripts
+database/       setup (base tables), skills seed data, demo classmates script, constraints, and the sessions, chat, study groups and ratings scripts
 ```
