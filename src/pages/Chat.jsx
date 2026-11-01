@@ -52,9 +52,11 @@ function Attachment({ message, mine }) {
   const [url, setUrl] = useState('')
   useEffect(() => {
     let active = true
-    attachmentUrl(message.file_path).then((u) => active && setUrl(u))
+    const isImage = message.file_type?.startsWith('image/')
+    // Images open in the browser; other files download with their original name
+    attachmentUrl(message.file_path, isImage ? undefined : message.file_name).then((u) => active && setUrl(u))
     return () => { active = false }
-  }, [message.file_path])
+  }, [message.file_path, message.file_type, message.file_name])
 
   if (!url) return <p className="text-sm opacity-80">Loading file…</p>
   if (message.file_type?.startsWith('image/')) {
@@ -65,7 +67,7 @@ function Attachment({ message, mine }) {
     )
   }
   return (
-    <a href={url} target="_blank" rel="noreferrer" download={message.file_name}
+    <a href={url} target="_blank" rel="noreferrer"
       className={`text-sm font-semibold underline ${mine ? 'text-primary-foreground' : 'text-foreground'}`}>
       {message.file_name}
     </a>

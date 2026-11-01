@@ -110,8 +110,10 @@ export function useConversations(userId) {
 }
 
 // A temporary link to open a private attachment
-export async function attachmentUrl(path) {
-  const { data } = await supabase.storage.from('chat-attachments').createSignedUrl(path, 3600)
+// Pass downloadName to make the browser save the file under its original name
+export async function attachmentUrl(path, downloadName) {
+  const options = downloadName ? { download: downloadName } : undefined
+  const { data } = await supabase.storage.from('chat-attachments').createSignedUrl(path, 3600, options)
   return data?.signedUrl ?? ''
 }
 
