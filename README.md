@@ -12,7 +12,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 |---|---|---|
 | Frontend | React + Vite | Component model suits profile, search, and scheduling views; Vite gives fast builds. |
 | Styling | Tailwind CSS with design tokens | Responsive layout and one themed palette defined in `src/index.css`. |
-| Backend and database | Supabase (PostgreSQL, Auth, REST API) | Managed relational database with built-in authentication and an auto-generated API. Row Level Security enforces who can read or change each row inside the database. |
+| Backend and database | Supabase (PostgreSQL, Auth, REST API, Realtime, Storage) | Managed relational database with built-in authentication and an auto-generated API. Row Level Security enforces who can read or change each row inside the database. |
 | Hosting | Vercel | Connects to GitHub and redeploys on every push to `main`. |
 
 **Change from the proposal.** The proposal planned Node/Express with MySQL. It was replaced with Supabase because it keeps a relational model (PostgreSQL), provides secure authentication out of the box, and removes the need to host and secure a separate server and database for a solo project. Access rules are written as Row Level Security policies instead of Express middleware.
@@ -26,7 +26,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Profile editing, teach/learn tags, availability | Done |
 | Browse, search and filters, suggested peers | Done |
 | Session scheduling and weekly calendar | Done |
-| In-app chat with attachments | Planned |
+| In-app chat with attachments | Done |
 | Study groups | Planned |
 | Ratings and session history | Planned |
 
@@ -36,6 +36,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 - `skills`: id, name, category (`academic` or `practical`). One shared catalog, so subjects and skills use the same tagging system. Seed data is in `database/skills.csv`.
 - `user_skills`: id, user_id (links to profiles), skill_id (links to skills), type (`teach` or `learn`)
 - `sessions`: id, requester_id and partner_id (both link to profiles), skill_id, starts_at, ends_at, location, note, status (`pending`, `accepted`, `declined`, `cancelled`). Created by `database/sessions.sql`.
+- `messages`: id, sender_id and recipient_id (both link to profiles), body, file_path, file_name, file_type. Created by `database/chat.sql`, which also sets up the private `chat-attachments` storage bucket.
 
 ## Matching
 
@@ -57,6 +58,16 @@ These rules are enforced in the database by row level security and a trigger (`d
 - Requests must be for a future time and can only be sent as yourself.
 - Only the invited student can accept or decline. Time, people, and topic can't be edited after sending.
 - **Double-booking check:** a request or acceptance is rejected if either student already has a confirmed session that overlaps it.
+
+## Chat
+
+Any two students can message each other: press Message on a classmate's card in Browse, or on a confirmed session. The Chat page lists your conversations and shows the thread. New messages appear instantly through Supabase Realtime, so no refresh is needed. A message can include one attachment (image, PDF, Word, PowerPoint or text file, up to 5 MB).
+
+These rules are enforced in the database (`database/chat.sql`):
+
+- Students only read messages they sent or received, and can only send as themselves.
+- A message needs text (up to 2000 characters) or a file.
+- Attachments are stored in a private bucket, in a folder named after the sender. Only the two people in the chat can open a file, through a temporary signed link.
 
 CRUD in the app: create and delete skill tags, read the catalog and tags, update profile details.
 
@@ -83,8 +94,8 @@ Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requ
 ```
 src/
   components/   AuthShell, PageHeader, PeerCard, RequestSession, RouteGuards
-  pages/        Login, Register, Dashboard, Profile, Browse, Sessions
-  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js
+  pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat
+  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js
   App.jsx, main.jsx, index.css
-database/       skills seed data, demo classmates script, sessions table
+database/       skills seed data, demo classmates script, sessions table, chat table and storage
 ```
