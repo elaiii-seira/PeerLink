@@ -3,6 +3,7 @@ import { useAuth } from '../AuthContext'
 import PageHeader from '../components/PageHeader'
 import PeerCard from '../components/PeerCard'
 import { isMatch, usePeers } from '../peers'
+import { fmtRange, startsIn, upcoming, useSessions } from '../sessions'
 
 function Section({ title, children }) {
   return (
@@ -30,6 +31,10 @@ export default function Dashboard() {
   const counts = { teach: me?.teach.length ?? 0, learn: me?.learn.length ?? 0 }
   const hasTags = counts.teach + counts.learn > 0
   const suggested = peers.filter(isMatch).slice(0, 2)
+  const { sessions } = useSessions(user.id)
+  const next = sessions.filter(upcoming).slice(0, 3)
+  const waiting = sessions.filter((s) => s.status === 'pending' && !s.iSent && s.start > new Date()).length
+  const soon = (s) => s.start - new Date() < 24 * 60 * 60 * 1000
 
   const fullName = profile?.full_name || user?.user_metadata?.full_name || 'there'
   const firstName = fullName.split(' ')[0]
@@ -42,7 +47,31 @@ export default function Dashboard() {
       <main className="mx-auto grid max-w-5xl gap-6 px-6 py-10 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <Section title="Upcoming sessions">
-            <p>No sessions yet. Once you match with a peer, confirmed sessions will appear here.</p>
+            {waiting > 0 && (
+              <p role="status" className="mb-4 rounded bg-muted px-3 py-2 font-semibold text-foreground">
+                {waiting} session {waiting === 1 ? 'request is' : 'requests are'} waiting for your answer.{' '}
+                <Link to="/sessions" className="underline">Review</Link>
+              </p>
+            )}
+            {next.length === 0 ? (
+              <p>No confirmed sessions yet. Request one from a suggested peer below or on Browse.</p>
+            ) : (
+              <ul>
+                {next.map((s) => (
+                  <li key={s.id} className="flex flex-wrap items-baseline justify-between gap-2 border-t border-border/25 py-3 first:border-t-0 first:pt-0">
+                    <div>
+                      <p className="font-semibold text-foreground">{s.skill} with {s.other.full_name}</p>
+                      <p className="text-sm">{fmtRange(s)}{s.location && ` · ${s.location}`}</p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      soon(s) ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
+                      {soon(s) ? `Reminder: starts ${startsIn(s.start)}` : startsIn(s.start)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link to="/sessions" className="btn-outline mt-4">Open calendar</Link>
           </Section>
           <Section title="Suggested peers">
             {loading ? (
