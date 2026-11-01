@@ -93,6 +93,23 @@ These rules are enforced in the database (`database/ratings.sql`):
 
 CRUD in the app: create and delete skill tags, read the catalog and tags, update profile details.
 
+## Database setup
+
+Create a Supabase project, then prepare the database in this order (SQL Editor, or the dashboard forms where noted):
+
+1. The `profiles`, `skills` and `user_skills` tables with their row level security policies and the sign-up trigger that creates a profile (described under Database above). Import `database/skills.csv` into `skills`.
+2. `database/constraints.sql`: blocks duplicate skill tags.
+3. `database/sessions.sql`: sessions table and policies.
+4. `database/chat.sql`: messages table, the private `chat-attachments` bucket and its policies.
+5. `database/groups.sql`: study group tables and policies.
+6. `database/ratings.sql`: ratings table and policies.
+7. Optional: `database/demo-classmates.sql` creates demo classmates for testing (follow the steps at the top of that file).
+
+Notes from setting this up on the Supabase dashboard:
+
+- The SQL Editor's checker can reject some statements (`create function`, `create trigger`, `alter publication`) or more than one statement at a time. If so, run statements one by one. Create the `check_session_rules` function and the `sessions_rules` trigger from the dashboard under Database > Functions and Database > Triggers (the function body and settings are in `database/sessions.sql`; the function must be security definer).
+- Turn on Realtime for `messages` and `group_messages` under Database > Publications > `supabase_realtime`.
+
 ## Run locally
 
 1. `npm install`
@@ -107,6 +124,21 @@ CRUD in the app: create and delete skill tags, read the catalog and tags, update
 4. Deploy. Every push to `main` redeploys automatically.
 5. In Supabase, set the Site URL and Redirect URLs to the Vercel address.
 
+## Accessibility and responsive design
+
+- Every form field has a visible label, and error messages use `role="alert"`.
+- A "Skip to main content" link appears on keyboard focus, and each page sets its own title.
+- Pop-ups use the native `<dialog>` element, which traps focus and closes with Escape. Chats announce new messages to screen readers.
+- Buttons and links have visible focus rings, and colours come from one palette with enough contrast.
+- Layouts work on phones: the navigation wraps, the weekly calendar becomes a day list, and the chat list and thread switch between screens.
+
+## Known limitations
+
+- Reminders are shown inside the app (dashboard badge within 24 hours). There are no email or push notifications.
+- Ratings can't be edited or deleted after sending, by design.
+- Chat attachments are limited to 5 MB and to images, PDF, Word, PowerPoint and text files.
+- Group chat is text only, and the group owner can't hand the group to another member.
+
 ## Git workflow
 
 Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requests, and merged into `main`.
@@ -119,5 +151,5 @@ src/
   pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
   AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js, ratings.js
   App.jsx, main.jsx, index.css
-database/       skills seed data, demo classmates script, sessions table, chat table and storage, study groups tables, ratings table
+database/       skills seed data, demo classmates script, constraints, and the sessions, chat, study groups and ratings scripts
 ```
