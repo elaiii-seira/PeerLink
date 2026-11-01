@@ -28,7 +28,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Session scheduling and weekly calendar | Done |
 | In-app chat with attachments | Done |
 | Study groups with group chat | Done |
-| Ratings and session history | Planned |
+| Ratings and session history | Done |
 
 ## Database
 
@@ -38,6 +38,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 - `sessions`: id, requester_id and partner_id (both link to profiles), skill_id, starts_at, ends_at, location, note, status (`pending`, `accepted`, `declined`, `cancelled`). Created by `database/sessions.sql`.
 - `messages`: id, sender_id and recipient_id (both link to profiles), body, file_path, file_name, file_type. Created by `database/chat.sql`, which also sets up the private `chat-attachments` storage bucket.
 - `study_groups`: id, owner_id (links to profiles), name, description, skill_id, max_members. `group_members`: group_id, user_id (one row per member). `group_messages`: id, group_id, sender_id, body. Created by `database/groups.sql`.
+- `ratings`: id, session_id (links to sessions), rater_id and ratee_id (both link to profiles), stars (1 to 5), comment. Created by `database/ratings.sql`.
 
 ## Matching
 
@@ -80,6 +81,16 @@ These rules are enforced in the database (`database/groups.sql`):
 - Students join and leave as themselves. A full group can't be joined, and the owner can't leave without deleting the group.
 - Only members can read or post in a group's chat, and only as themselves.
 
+## Ratings and session history
+
+After a confirmed session ends, either student can rate the other from 1 to 5 stars with an optional comment (Sessions page, Past sessions). A student's average rating shows on their card in Browse and Dashboard, and your own Profile page lists the ratings you received and your completed sessions.
+
+These rules are enforced in the database (`database/ratings.sql`):
+
+- Only the two students of a confirmed session can rate each other, and only after it has ended.
+- You rate as yourself, once per session, from 1 to 5 stars.
+- Ratings are visible to signed-in students and can't be edited or deleted after sending.
+
 CRUD in the app: create and delete skill tags, read the catalog and tags, update profile details.
 
 ## Run locally
@@ -104,9 +115,9 @@ Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requ
 
 ```
 src/
-  components/   AuthShell, CreateGroup, PageHeader, PeerCard, RequestSession, RouteGuards
+  components/   AuthShell, CreateGroup, PageHeader, PeerCard, ProfileActivity, RateSession, RequestSession, RouteGuards, Stars
   pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
-  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js
+  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js, ratings.js
   App.jsx, main.jsx, index.css
-database/       skills seed data, demo classmates script, sessions table, chat table and storage, study groups tables
+database/       skills seed data, demo classmates script, sessions table, chat table and storage, study groups tables, ratings table
 ```
