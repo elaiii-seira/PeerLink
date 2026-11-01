@@ -27,7 +27,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Browse, search and filters, suggested peers | Done |
 | Session scheduling and weekly calendar | Done |
 | In-app chat with attachments | Done |
-| Study groups | Planned |
+| Study groups with group chat | Done |
 | Ratings and session history | Planned |
 
 ## Database
@@ -37,6 +37,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 - `user_skills`: id, user_id (links to profiles), skill_id (links to skills), type (`teach` or `learn`)
 - `sessions`: id, requester_id and partner_id (both link to profiles), skill_id, starts_at, ends_at, location, note, status (`pending`, `accepted`, `declined`, `cancelled`). Created by `database/sessions.sql`.
 - `messages`: id, sender_id and recipient_id (both link to profiles), body, file_path, file_name, file_type. Created by `database/chat.sql`, which also sets up the private `chat-attachments` storage bucket.
+- `study_groups`: id, owner_id (links to profiles), name, description, skill_id, max_members. `group_members`: group_id, user_id (one row per member). `group_messages`: id, group_id, sender_id, body. Created by `database/groups.sql`.
 
 ## Matching
 
@@ -69,6 +70,16 @@ These rules are enforced in the database (`database/chat.sql`):
 - A message needs text (up to 2000 characters) or a file.
 - Attachments are stored in a private bucket, in a folder named after the sender. Only the two people in the chat can open a file, through a temporary signed link.
 
+## Study groups
+
+Any student can create a group (name, subject, description, size limit), browse and search groups, and join or leave them. A group page shows its members and a group chat that updates live through Supabase Realtime. The creator leads the group and can delete it.
+
+These rules are enforced in the database (`database/groups.sql`):
+
+- Students create groups as themselves, and only the owner can edit or delete a group.
+- Students join and leave as themselves. A full group can't be joined, and the owner can't leave without deleting the group.
+- Only members can read or post in a group's chat, and only as themselves.
+
 CRUD in the app: create and delete skill tags, read the catalog and tags, update profile details.
 
 ## Run locally
@@ -93,9 +104,9 @@ Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requ
 
 ```
 src/
-  components/   AuthShell, PageHeader, PeerCard, RequestSession, RouteGuards
-  pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat
-  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js
+  components/   AuthShell, CreateGroup, PageHeader, PeerCard, RequestSession, RouteGuards
+  pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
+  AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js
   App.jsx, main.jsx, index.css
-database/       skills seed data, demo classmates script, sessions table, chat table and storage
+database/       skills seed data, demo classmates script, sessions table, chat table and storage, study groups tables
 ```
