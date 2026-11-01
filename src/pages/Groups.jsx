@@ -61,7 +61,7 @@ export default function Groups() {
   return (
     <div className="min-h-screen">
       <PageHeader title="Study groups" subtitle="Join a group to study together, or start your own." />
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main id="main" className="mx-auto max-w-5xl px-6 py-10">
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-48 flex-1">
             <label htmlFor="group-search" className="field-label">Search groups</label>

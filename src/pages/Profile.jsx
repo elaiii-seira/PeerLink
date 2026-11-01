@@ -140,7 +140,7 @@ export default function Profile() {
       <PageHeader title="Your profile"
         subtitle="Tell classmates what you can teach and what you want to learn." />
 
-      <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
+      <main id="main" className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
 
         <section className={card}>

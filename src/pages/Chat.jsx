@@ -191,7 +191,7 @@ export default function Chat() {
   return (
     <div className="min-h-screen">
       <PageHeader title="Chat" subtitle="Message classmates to plan sessions and share notes." />
-      <main className="mx-auto grid max-w-5xl gap-6 px-6 py-10 md:grid-cols-[18rem_1fr]">
+      <main id="main" className="mx-auto grid max-w-5xl gap-6 px-6 py-10 md:grid-cols-[18rem_1fr]">
         <div className={partnerId ? 'hidden md:block' : ''}>
           <Inbox userId={user.id} activeId={partnerId} />
         </div>
