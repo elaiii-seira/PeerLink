@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import PageHeader from '../components/PageHeader'
+import RateSession from '../components/RateSession'
+import Stars from '../components/Stars'
+import { useRatings } from '../ratings'
 import {
   addDays, fmtDay, fmtRange, fmtTime, sameDay, startOfWeek, startsIn, upcoming, useSessions,
 } from '../sessions'
@@ -171,6 +174,8 @@ function Item({ children, actions }) {
 export default function Sessions() {
   const { user } = useAuth()
   const { loading, error, sessions, setStatus } = useSessions(user.id)
+  const { given, reload: reloadRatings } = useRatings(user.id)
+  const [rating, setRating] = useState(null) // the past session being rated
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState('')
 
@@ -190,6 +195,7 @@ export default function Sessions() {
   const incoming = pending.filter((s) => !s.iSent)
   const sent = pending.filter((s) => s.iSent)
   const next = sessions.filter(upcoming)
+  const past = sessions.filter((s) => s.status === 'accepted' && s.end <= now).reverse()
 
   return (
     <div className="min-h-screen">
@@ -255,9 +261,32 @@ export default function Sessions() {
                 </ul>
               )}
             </section>
+
+            <section className={card} aria-labelledby="past-heading">
+              <h2 id="past-heading" className="text-xl font-semibold">Past sessions</h2>
+              {past.length === 0 ? (
+                <p className="mt-2 text-muted-foreground">Finished sessions will appear here so you can rate them.</p>
+              ) : (
+                <ul className="mt-4">
+                  {past.map((s) => (
+                    <Item key={s.id} actions={
+                      given.has(s.id) ? (
+                        <p className="text-sm text-muted-foreground">You rated <Stars value={given.get(s.id)} /></p>
+                      ) : (
+                        <button className="btn-outline" onClick={() => setRating(s)}>
+                          Rate {s.other.full_name.split(' ')[0]}
+                        </button>
+                      )}>
+                      <Details s={s} />
+                    </Item>
+                  ))}
+                </ul>
+              )}
+            </section>
           </>
         )}
       </main>
+      {rating && <RateSession session={rating} onClose={() => setRating(null)} onDone={reloadRatings} />}
     </div>
   )
 }
