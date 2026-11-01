@@ -201,7 +201,7 @@ export default function Sessions() {
     <div className="min-h-screen">
       <PageHeader title="Sessions" subtitle="Your tutoring requests and weekly schedule." />
 
-      <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
+      <main id="main" className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         {(error || actionError) && (
           <p role="alert" className="text-sm font-semibold text-destructive">{error || actionError}</p>
         )}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 
@@ -10,8 +11,13 @@ const navClass = ({ isActive }) =>
 
 export default function PageHeader({ title, subtitle }) {
   const { signOut } = useAuth()
+  useEffect(() => { document.title = `${title} · PeerLink` }, [title])
   return (
     <header className="bg-primary text-primary-foreground">
+      <a href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2 focus:font-semibold focus:text-foreground">
+        Skip to main content
+      </a>
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-5">
         <span className="font-heading text-xl font-semibold">PeerLink</span>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">

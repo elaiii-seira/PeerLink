@@ -90,7 +90,7 @@ export default function GroupDetail() {
     <div className="min-h-screen">
       <PageHeader title={group?.name ?? 'Study group'}
         subtitle={group ? `${group.subject || 'General study'} · led by ${group.owner?.full_name ?? 'a student'}` : ''} />
-      <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
+      <main id="main" className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <Link to="/groups" className="inline-block text-sm font-semibold underline">← All groups</Link>
         {(error || actionError) && <p role="alert" className="text-sm font-semibold text-destructive">{error || actionError}</p>}
 

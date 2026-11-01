@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
+
 export default function AuthShell({ title, subtitle, children, footer }) {
+  useEffect(() => { document.title = `${title} · PeerLink` }, [title])
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <aside className="flex flex-col justify-between bg-primary px-8 py-10 text-primary-foreground lg:px-14 lg:py-14">
@@ -17,7 +20,7 @@ export default function AuthShell({ title, subtitle, children, footer }) {
         </p>
       </aside>
 
-      <main className="flex items-center justify-center px-6 py-12">
+      <main id="main" className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <h1 className="text-3xl font-semibold">{title}</h1>
           <p className="mt-2 text-muted-foreground">{subtitle}</p>
