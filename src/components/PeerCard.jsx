@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import RequestSession from './RequestSession'
 
 const card = 'flex flex-col rounded border border-border/25 bg-card p-5 text-card-foreground'
@@ -78,9 +79,12 @@ export default function PeerCard({ peer, compact = false }) {
         {sharedSlots.length > 0 && ` (${sharedSlots.length} in common with you)`}
       </p>
 
-      <button type="button" className="btn-outline mt-4 w-full" onClick={() => setRequesting(true)}>
-        Request session
-      </button>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button type="button" className="btn-outline" onClick={() => setRequesting(true)}>
+          Request session
+        </button>
+        <Link to={`/chat/${peer.id}`} className="btn-outline">Message</Link>
+      </div>
       {requesting && <RequestSession peer={peer} onClose={() => setRequesting(false)} />}
     </article>
   )
