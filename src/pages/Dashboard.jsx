@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import PageHeader from '../components/PageHeader'
 import PeerCard from '../components/PeerCard'
+import { RatingSummary } from '../components/Stars'
 import { isMatch, usePeers } from '../peers'
+import { useRatings } from '../ratings'
 import { fmtRange, startsIn, upcoming, useSessions } from '../sessions'
 
 function Section({ title, children }) {
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const hasTags = counts.teach + counts.learn > 0
   const suggested = peers.filter(isMatch).slice(0, 2)
   const { sessions } = useSessions(user.id)
+  const { summary: rating } = useRatings(user.id)
   const next = sessions.filter(upcoming).slice(0, 3)
   const waiting = sessions.filter((s) => s.status === 'pending' && !s.iSent && s.start > new Date()).length
   const soon = (s) => s.start - new Date() < 24 * 60 * 60 * 1000
@@ -44,7 +47,7 @@ export default function Dashboard() {
       <PageHeader title={`Welcome, ${firstName}.`}
         subtitle="Your hub for tutoring, study groups, and skill swaps with classmates." />
 
-      <main className="mx-auto grid max-w-5xl gap-6 px-6 py-10 lg:grid-cols-[2fr_1fr]">
+      <main id="main" className="mx-auto grid max-w-5xl gap-6 px-6 py-10 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <Section title="Upcoming sessions">
             {waiting > 0 && (
@@ -107,6 +110,7 @@ export default function Dashboard() {
               <Row label="Email" value={user?.email} />
               <Row label="Can teach" value={plural(counts.teach)} />
               <Row label="Want to learn" value={plural(counts.learn)} />
+              <Row label="Your rating" value={<RatingSummary {...rating} />} />
             </dl>
             <Link to="/profile" className="btn-outline mt-4 w-full">Edit profile</Link>
           </section>
