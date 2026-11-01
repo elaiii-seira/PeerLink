@@ -14,13 +14,14 @@ export default function PageHeader({ title, subtitle }) {
     <header className="bg-primary text-primary-foreground">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-5">
         <span className="font-heading text-xl font-semibold">PeerLink</span>
-        <nav className="flex items-center gap-6">
+        <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
           <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>
           <NavLink to="/browse" className={navClass}>Browse</NavLink>
+          <NavLink to="/sessions" className={navClass}>Sessions</NavLink>
           <NavLink to="/profile" className={navClass}>Profile</NavLink>
           <button
             onClick={signOut}
-            className="rounded border border-primary-foreground/40 px-3 py-1.5 text-sm font-semibold hover:bg-primary-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground"
+            className="whitespace-nowrap rounded border border-primary-foreground/40 px-3 py-1.5 text-sm font-semibold hover:bg-primary-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground"
           >
             Log out
           </button>

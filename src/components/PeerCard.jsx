@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import RequestSession from './RequestSession'
+
 const card = 'flex flex-col rounded border border-border/25 bg-card p-5 text-card-foreground'
 
 // Matched skills are filled, the rest are outlined
@@ -31,6 +34,7 @@ const names = (skills) => skills.map((s) => s.name).join(', ')
 export default function PeerCard({ peer, compact = false }) {
   const { full_name, course, year_level, bio, availability, teach, learn,
     canHelpMe, iCanHelp, sharedSlots, mutual } = peer
+  const [requesting, setRequesting] = useState(false)
 
   return (
     <article className={card}>
@@ -73,6 +77,11 @@ export default function PeerCard({ peer, compact = false }) {
         {availability?.length ? availability.join(', ') : 'Not set'}
         {sharedSlots.length > 0 && ` (${sharedSlots.length} in common with you)`}
       </p>
+
+      <button type="button" className="btn-outline mt-4 w-full" onClick={() => setRequesting(true)}>
+        Request session
+      </button>
+      {requesting && <RequestSession peer={peer} onClose={() => setRequesting(false)} />}
     </article>
   )
 }
