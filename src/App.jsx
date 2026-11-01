@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import Browse from './pages/Browse'
 import Sessions from './pages/Sessions'
+import Chat from './pages/Chat'
 
 export default function App() {
   return (
@@ -17,6 +18,8 @@ export default function App() {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/browse" element={<ProtectedRoute><Browse /></ProtectedRoute>} />
       <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      <Route path="/chat/:partnerId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
