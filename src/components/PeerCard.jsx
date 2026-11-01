@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import RequestSession from './RequestSession'
+import { RatingSummary } from './Stars'
 
 const card = 'flex flex-col rounded border border-border/25 bg-card p-5 text-card-foreground'
 
@@ -52,6 +53,8 @@ export default function PeerCard({ peer, compact = false }) {
           </span>
         )}
       </div>
+
+      <p className="mt-2"><RatingSummary {...peer.rating} /></p>
 
       {(canHelpMe.length > 0 || iCanHelp.length > 0) && (
         <ul className="mt-3 space-y-1 rounded bg-muted px-3 py-2 text-sm">

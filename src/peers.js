@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { summarize } from './ratings'
 
 // Group each user's tags into { teach: [...skills], learn: [...skills] }
 function groupTags(rows) {
@@ -44,20 +45,24 @@ export function usePeers(userId) {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [profiles, tags, catalog] = await Promise.all([
+      const [profiles, tags, catalog, ratings] = await Promise.all([
         supabase.from('profiles').select('id, full_name, course, year_level, bio, availability'),
         supabase.from('user_skills').select('user_id, type, skills(id, name, category)'),
         supabase.from('skills').select('id, name, category').order('name'),
+        supabase.from('ratings').select('ratee_id, stars'),
       ])
       if (cancelled) return
       const err = profiles.error || tags.error || catalog.error
       if (err) return setState((s) => ({ ...s, loading: false, error: err.message }))
 
       const tagMap = groupTags(tags.data)
+      const stars = {}
+      for (const r of ratings.data ?? []) (stars[r.ratee_id] ??= []).push(r.stars)
       const withTags = profiles.data.map((p) => ({
         ...p,
         teach: tagMap[p.id]?.teach ?? [],
         learn: tagMap[p.id]?.learn ?? [],
+        rating: summarize(stars[p.id] ?? []),
       }))
       const me = withTags.find((p) => p.id === userId) ?? { teach: [], learn: [], availability: [] }
       const peers = withTags
