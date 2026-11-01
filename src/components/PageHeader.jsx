@@ -19,6 +19,7 @@ export default function PageHeader({ title, subtitle }) {
           <NavLink to="/browse" className={navClass}>Browse</NavLink>
           <NavLink to="/sessions" className={navClass}>Sessions</NavLink>
           <NavLink to="/chat" className={navClass}>Chat</NavLink>
+          <NavLink to="/groups" className={navClass}>Groups</NavLink>
           <NavLink to="/profile" className={navClass}>Profile</NavLink>
           <button
             onClick={signOut}
