@@ -7,17 +7,21 @@ import { useGroups } from '../groups'
 
 const card = 'flex flex-col rounded border border-border/25 bg-card p-5 text-card-foreground'
 
-function GroupCard({ group, onJoin, busy }) {
-  const { id, name, description, subject, count, max_members, owner, isMember, full } = group
+function GroupCard({ group, onRequest, busy }) {
+  const { id, name, description, subject, count, max_members, owner, isMember, isOwner, full, myRequest, requests } = group
   return (
     <article className={card}>
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold leading-snug">{name}</h3>
-        {isMember && (
+        {isOwner && requests.length > 0 ? (
           <span className="shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
-            Joined
+            {requests.length} {requests.length === 1 ? 'request' : 'requests'}
           </span>
-        )}
+        ) : isMember ? (
+          <span className="shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+            {isOwner ? 'Your group' : 'Joined'}
+          </span>
+        ) : null}
       </div>
       <p className="text-sm text-muted-foreground">
         {subject || 'General study'} · led by {owner?.full_name ?? 'a student'}
@@ -26,11 +30,12 @@ function GroupCard({ group, onJoin, busy }) {
       <p className="mt-auto pt-4 text-sm text-muted-foreground">
         <span className="font-semibold text-foreground">{count}/{max_members}</span> members{full && ' · Full'}
       </p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className={`mt-3 grid gap-2 ${isMember ? '' : 'grid-cols-2'}`}>
         <Link to={`/groups/${id}`} className="btn-outline">{isMember ? 'Open' : 'View'}</Link>
         {!isMember && (
-          <button type="button" className="btn-primary py-2" disabled={full || busy} onClick={() => onJoin(id)}>
-            {full ? 'Full' : 'Join'}
+          <button type="button" className="btn-primary py-2" disabled={full || busy || Boolean(myRequest)}
+            onClick={() => onRequest(id)}>
+            {myRequest ? 'Request sent' : full ? 'Full' : 'Request to join'}
           </button>
         )}
       </div>
@@ -40,16 +45,16 @@ function GroupCard({ group, onJoin, busy }) {
 
 export default function Groups() {
   const { user } = useAuth()
-  const { loading, error, groups, join } = useGroups(user.id)
+  const { loading, error, groups, requestJoin } = useGroups(user.id)
   const [creating, setCreating] = useState(false)
   const [q, setQ] = useState('')
   const [onlyMine, setOnlyMine] = useState(false)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState('')
 
-  async function onJoin(id) {
+  async function onRequest(id) {
     setBusy(true)
-    setActionError(await join(id))
+    setActionError(await requestJoin(id))
     setBusy(false)
   }
 
@@ -60,7 +65,7 @@ export default function Groups() {
 
   return (
     <div className="min-h-screen">
-      <PageHeader title="Study groups" subtitle="Join a group to study together, or start your own." />
+      <PageHeader title="Study groups" subtitle="Ask to join a group, or start your own. Group owners approve every new member." />
       <main id="main" className="mx-auto max-w-5xl px-6 py-10">
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-48 flex-1">
@@ -88,7 +93,7 @@ export default function Groups() {
         ) : (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shown.map((g) => <li key={g.id} className="flex"><div className="flex-1 [&>article]:h-full">
-              <GroupCard group={g} onJoin={onJoin} busy={busy} />
+              <GroupCard group={g} onRequest={onRequest} busy={busy} />
             </div></li>)}
           </ul>
         )}

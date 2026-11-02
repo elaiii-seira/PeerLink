@@ -6,9 +6,15 @@ const GROUP_FIELDS = `id, created_at, owner_id, name, description, max_members,
   skills(name),
   group_members(user_id)`
 
-// Add the fields the pages need: member count, whether I'm in, whether it's full
-function shape(row, userId) {
+const REQUEST_FIELDS = `id, group_id, user_id, created_at,
+  requester:profiles!group_join_requests_user_id_fkey(id, full_name, course)`
+
+// Add the fields the pages need: member count, whether I'm in, whether it's full,
+// my own pending request, and (for the owner) the requests waiting for an answer.
+// Row level security only returns requests I sent or requests to groups I own.
+function shape(row, userId, requests = []) {
   const ids = row.group_members.map((m) => m.user_id)
+  const mine = requests.filter((r) => r.group_id === row.id)
   return {
     ...row,
     subject: row.skills?.name ?? '',
@@ -16,10 +22,13 @@ function shape(row, userId) {
     isMember: ids.includes(userId),
     isOwner: row.owner_id === userId,
     full: ids.length >= row.max_members,
+    myRequest: mine.find((r) => r.user_id === userId) ?? null,
+    requests: row.owner_id === userId ? mine.filter((r) => r.user_id !== userId) : [],
   }
 }
 
-// Join, leave and delete share the same shape: do it, reload, return an error message or ''
+// Every action works the same way: do it, reload, return an error message or ''.
+// Nobody can join a group directly: a student sends a request and only the owner can approve it.
 function useActions(reload) {
   const run = async (query) => {
     const { error } = await query
@@ -28,8 +37,18 @@ function useActions(reload) {
     return ''
   }
   return {
-    join: (groupId) => run(supabase.from('group_members').insert({ group_id: groupId })),
+    requestJoin: (groupId) => run(supabase.from('group_join_requests').insert({ group_id: groupId })),
+    cancelRequest: (requestId) => run(supabase.from('group_join_requests').delete().eq('id', requestId)),
+    decline: (requestId) => run(supabase.from('group_join_requests').delete().eq('id', requestId)),
+    // Owner only: add the student, then clear the request
+    async approve(request) {
+      const added = await supabase.from('group_members').insert({ group_id: request.group_id, user_id: request.user_id })
+      if (added.error) return added.error.message
+      return run(supabase.from('group_join_requests').delete().eq('id', request.id))
+    },
     leave: (groupId, userId) =>
+      run(supabase.from('group_members').delete().eq('group_id', groupId).eq('user_id', userId)),
+    removeMember: (groupId, userId) =>
       run(supabase.from('group_members').delete().eq('group_id', groupId).eq('user_id', userId)),
     remove: (groupId) => run(supabase.from('study_groups').delete().eq('id', groupId)),
   }
@@ -39,9 +58,13 @@ export function useGroups(userId) {
   const [state, setState] = useState({ loading: true, error: '', groups: [] })
 
   const reload = useCallback(async () => {
-    const { data, error } = await supabase.from('study_groups').select(GROUP_FIELDS).order('created_at', { ascending: false })
-    if (error) return setState({ loading: false, error: error.message, groups: [] })
-    setState({ loading: false, error: '', groups: data.map((g) => shape(g, userId)) })
+    const [g, r] = await Promise.all([
+      supabase.from('study_groups').select(GROUP_FIELDS).order('created_at', { ascending: false }),
+      supabase.from('group_join_requests').select(REQUEST_FIELDS),
+    ])
+    const error = g.error?.message || r.error?.message || ''
+    if (error) return setState({ loading: false, error, groups: [] })
+    setState({ loading: false, error: '', groups: g.data.map((row) => shape(row, userId, r.data)) })
   }, [userId])
 
   useEffect(() => { reload() }, [reload])
@@ -53,17 +76,18 @@ export function useGroup(groupId, userId) {
   const [state, setState] = useState({ loading: true, error: '', group: null, members: [] })
 
   const reload = useCallback(async () => {
-    const [g, m] = await Promise.all([
+    const [g, m, r] = await Promise.all([
       supabase.from('study_groups').select(GROUP_FIELDS).eq('id', groupId).maybeSingle(),
       supabase.from('group_members')
         .select('user_id, joined_at, profiles!group_members_user_id_fkey(id, full_name, course)')
         .eq('group_id', groupId).order('joined_at'),
+      supabase.from('group_join_requests').select(REQUEST_FIELDS).eq('group_id', groupId),
     ])
-    const error = g.error?.message || m.error?.message || ''
+    const error = g.error?.message || m.error?.message || r.error?.message || ''
     setState({
       loading: false,
       error,
-      group: g.data ? shape(g.data, userId) : null,
+      group: g.data ? shape(g.data, userId, r.data ?? []) : null,
       members: (m.data ?? []).map((r) => r.profiles).filter(Boolean),
     })
   }, [groupId, userId])

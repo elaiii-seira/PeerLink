@@ -12,9 +12,10 @@ function GroupChat({ groupId, userId }) {
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [problem, setProblem] = useState('')
-  const bottom = useRef(null)
+  const list = useRef(null)
 
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }) }, [messages.length])
+  // Keep the newest message in view by scrolling the list itself, not the whole page
+  useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight }, [messages.length])
 
   async function submit(e) {
     e.preventDefault()
@@ -27,33 +28,33 @@ function GroupChat({ groupId, userId }) {
   }
 
   return (
-    <section className={`${card} flex h-[60vh] flex-col p-0`} aria-labelledby="group-chat-heading">
-      <h2 id="group-chat-heading" className="border-b border-border/25 px-5 py-4 text-xl font-semibold">Group chat</h2>
-      <ul role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+    <section className="flex h-[75vh] min-h-[30rem] flex-col rounded border border-border/25 bg-card text-card-foreground" aria-labelledby="group-chat-heading">
+      <h2 id="group-chat-heading" className="border-b border-border/25 px-6 py-4 text-xl font-semibold">Group chat</h2>
+      <ul ref={list} role="log" aria-live="polite" className="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-base">
         {loading && <li className="text-muted-foreground">Loading messages…</li>}
         {!loading && messages.length === 0 && <li className="text-muted-foreground">No messages yet. Say hello!</li>}
         {messages.map((m) => {
           const mine = m.sender_id === userId
           return (
             <li key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-lg px-3 py-2 ${mine ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
-                {!mine && <p className="text-xs font-semibold">{m.sender?.full_name ?? 'Former member'}</p>}
+              <div className={`max-w-[85%] rounded-lg px-4 py-2.5 sm:max-w-[75%] ${mine ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
+                {!mine && <p className="text-sm font-semibold">{m.sender?.full_name ?? 'Former member'}</p>}
                 <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                <p className={`text-xs ${mine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{fmtStamp(m.created_at)}</p>
+                <p className={`mt-1 text-xs ${mine ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{fmtStamp(m.created_at)}</p>
               </div>
             </li>
           )
         })}
-        <li ref={bottom} aria-hidden="true" />
       </ul>
       <form onSubmit={submit} className="border-t border-border/25 p-4">
         {(error || problem) && <p role="alert" className="mb-2 text-sm font-semibold text-destructive">{error || problem}</p>}
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-3">
           <label className="sr-only" htmlFor="group-message">Message</label>
-          <textarea id="group-message" rows={1} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)}
+          <textarea id="group-message" rows={2} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(e) } }}
-            placeholder="Write to the group…" className="field max-h-32 flex-1 resize-none" />
-          <button type="submit" className="btn-primary" disabled={sending || !text.trim()}>
+            placeholder="Write to the group…"
+            className="field max-h-40 min-h-[3.5rem] flex-1 resize-none text-base" />
+          <button type="submit" className="btn-primary h-[3.5rem] px-6" disabled={sending || !text.trim()}>
             {sending ? 'Sending…' : 'Send'}
           </button>
         </div>
@@ -66,7 +67,8 @@ export default function GroupDetail() {
   const { user } = useAuth()
   const { groupId } = useParams()
   const navigate = useNavigate()
-  const { loading, error, group, members, join, leave, remove } = useGroup(groupId, user.id)
+  const { loading, error, group, members, requestJoin, cancelRequest, decline, approve, leave, removeMember, remove } =
+    useGroup(groupId, user.id)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState('')
 
@@ -104,12 +106,19 @@ export default function GroupDetail() {
               <section className={card} aria-labelledby="about-heading">
                 <h2 id="about-heading" className="text-xl font-semibold">About</h2>
                 <p className="mt-2 whitespace-pre-wrap text-muted-foreground">{group.description || 'No description yet.'}</p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {!group.isMember && (
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  {!group.isMember && !group.myRequest && (
                     <button className="btn-primary" disabled={busy || group.full}
-                      onClick={() => act(() => join(group.id))}>
-                      {group.full ? 'Group is full' : 'Join group'}
+                      onClick={() => act(() => requestJoin(group.id))}>
+                      {group.full ? 'Group is full' : 'Request to join'}
                     </button>
+                  )}
+                  {!group.isMember && group.myRequest && (
+                    <>
+                      <p role="status" className="font-semibold">Request sent. The group leader will review it.</p>
+                      <button className="btn-outline" disabled={busy}
+                        onClick={() => act(() => cancelRequest(group.myRequest.id))}>Cancel request</button>
+                    </>
                   )}
                   {group.isMember && !group.isOwner && (
                     <button className="btn-outline" disabled={busy}
@@ -121,10 +130,41 @@ export default function GroupDetail() {
                 </div>
               </section>
 
+              {group.isOwner && (
+                <section className={card} aria-labelledby="requests-heading">
+                  <h2 id="requests-heading" className="text-xl font-semibold">
+                    Join requests{group.requests.length > 0 && ` (${group.requests.length})`}
+                  </h2>
+                  {group.requests.length === 0 ? (
+                    <p className="mt-2 text-muted-foreground">No one is waiting to join.</p>
+                  ) : (
+                    <ul className="mt-3">
+                      {group.requests.map((r) => (
+                        <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-border/25 py-3 first:border-t-0">
+                          <span className="min-w-0">
+                            <span className="block truncate font-semibold">{r.requester?.full_name ?? 'A student'}</span>
+                            {r.requester?.course && <span className="text-sm text-muted-foreground">{r.requester.course}</span>}
+                          </span>
+                          <span className="flex gap-2">
+                            <button className="btn-primary py-2" disabled={busy || group.full}
+                              onClick={() => act(() => approve(r))}>
+                              {group.full ? 'Group full' : 'Approve'}
+                            </button>
+                            <button className="btn-outline" disabled={busy} onClick={() => act(() => decline(r.id))}>Decline</button>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )}
+
               {group.isMember ? (
                 <GroupChat groupId={group.id} userId={user.id} />
               ) : (
-                <p className={`${card} text-muted-foreground`}>Join this group to read and write in its chat.</p>
+                <p className={`${card} text-muted-foreground`}>
+                  The group chat is for members only. Ask to join, and the group leader decides.
+                </p>
               )}
             </div>
 
@@ -140,7 +180,15 @@ export default function GroupDetail() {
                       {m.course && <span className="text-sm text-muted-foreground">{m.course}</span>}
                     </span>
                     {m.id !== user.id && (
-                      <Link to={`/chat/${m.id}`} className="shrink-0 text-sm font-semibold underline">Message</Link>
+                      <span className="flex shrink-0 flex-col items-end gap-1 text-sm font-semibold">
+                        {group.isMember && <Link to={`/chat/${m.id}`} className="underline">Message</Link>}
+                        {group.isOwner && (
+                          <button type="button" className="text-muted-foreground underline" disabled={busy}
+                            onClick={() => act(() => removeMember(group.id, m.id), `Remove ${m.full_name} from the group?`)}>
+                            Remove
+                          </button>
+                        )}
+                      </span>
                     )}
                   </li>
                 ))}
