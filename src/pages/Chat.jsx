@@ -62,7 +62,7 @@ function Attachment({ message, mine }) {
   if (message.file_type?.startsWith('image/')) {
     return (
       <a href={url} target="_blank" rel="noreferrer">
-        <img src={url} alt={message.file_name} className="max-h-56 rounded" />
+        <img src={url} alt={message.file_name} className="max-h-72 rounded" />
       </a>
     )
   }
@@ -77,7 +77,7 @@ function Attachment({ message, mine }) {
 function Bubble({ message, mine }) {
   return (
     <li className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[80%] space-y-2 rounded-lg px-3 py-2 ${
+      <div className={`max-w-[85%] space-y-2 rounded-lg px-4 py-2.5 sm:max-w-[75%] ${
         mine ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
         {message.file_path && <Attachment message={message} mine={mine} />}
         {message.body && <p className="whitespace-pre-wrap break-words">{message.body}</p>}
@@ -97,7 +97,7 @@ function Thread({ userId, partnerId }) {
   const [sending, setSending] = useState(false)
   const [problem, setProblem] = useState('')
   const fileInput = useRef(null)
-  const bottom = useRef(null)
+  const list = useRef(null)
 
   useEffect(() => {
     setPartner(null)
@@ -105,7 +105,8 @@ function Thread({ userId, partnerId }) {
       .then(({ data }) => setPartner(data ?? { id: partnerId, full_name: 'Unknown student' }))
   }, [partnerId])
 
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }) }, [messages.length])
+  // Keep the newest message in view by scrolling the list itself, not the whole page
+  useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight }, [messages.length])
 
   function pick(e) {
     const chosen = e.target.files[0]
@@ -132,19 +133,18 @@ function Thread({ userId, partnerId }) {
   }
 
   return (
-    <section className={`${card} flex h-[70vh] flex-col`} aria-label="Conversation">
-      <div className="border-b border-border/25 px-5 py-4">
+    <section className={`${card} flex h-[calc(100dvh-19rem)] min-h-[26rem] flex-col md:h-[calc(100vh-14rem)] md:min-h-[32rem]`} aria-label="Conversation">
+      <div className="border-b border-border/25 px-6 py-4">
         <h2 className="text-xl font-semibold">{partner?.full_name ?? 'Loading…'}</h2>
         {partner?.course && <p className="text-sm text-muted-foreground">{partner.course}</p>}
       </div>
 
-      <ul role="log" aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+      <ul ref={list} role="log" aria-live="polite" className="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-base">
         {loading && <li className="text-muted-foreground">Loading messages…</li>}
         {!loading && messages.length === 0 && (
           <li className="text-muted-foreground">No messages yet. Say hello!</li>
         )}
         {messages.map((m) => <Bubble key={m.id} message={m} mine={m.sender_id === userId} />)}
-        <li ref={bottom} aria-hidden="true" />
       </ul>
 
       <form onSubmit={submit} className="border-t border-border/25 p-4">
@@ -157,19 +157,20 @@ function Thread({ userId, partnerId }) {
             <button type="button" onClick={clearFile} className="text-muted-foreground underline">Remove</button>
           </p>
         )}
-        <div className="flex items-end gap-2">
-          <label className="btn-outline cursor-pointer" title={`Attach a file (up to ${MAX_FILE_MB} MB)`}>
+        <div className="flex items-end gap-3">
+          <label className="btn-outline h-[3.5rem] cursor-pointer" title={`Attach a file (up to ${MAX_FILE_MB} MB)`}>
             Attach
             <input ref={fileInput} type="file" accept={ACCEPT} onChange={pick} className="sr-only" />
           </label>
           <label className="sr-only" htmlFor="message-text">Message</label>
-          <textarea id="message-text" rows={1} maxLength={2000} value={text}
+          <textarea id="message-text" rows={2} maxLength={2000} value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(e) }
             }}
-            placeholder="Write a message…" className="field max-h-32 flex-1 resize-none" />
-          <button type="submit" className="btn-primary" disabled={sending || (!text.trim() && !file)}>
+            placeholder="Write a message…"
+            className="field max-h-40 min-h-[3.5rem] flex-1 resize-none text-base" />
+          <button type="submit" className="btn-primary h-[3.5rem] px-6" disabled={sending || (!text.trim() && !file)}>
             {sending ? 'Sending…' : 'Send'}
           </button>
         </div>
@@ -190,8 +191,8 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen">
-      <PageHeader title="Chat" subtitle="Message classmates to plan sessions and share notes." />
-      <main id="main" className="mx-auto grid max-w-5xl gap-6 px-6 py-10 md:grid-cols-[18rem_1fr]">
+      <PageHeader title="Chat" subtitle="Message classmates to plan sessions and share notes." compact wide />
+      <main id="main" className="mx-auto grid max-w-6xl gap-6 px-6 py-6 md:grid-cols-[20rem_1fr]">
         <div className={partnerId ? 'hidden md:block' : ''}>
           <Inbox userId={user.id} activeId={partnerId} />
         </div>

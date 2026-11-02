@@ -27,7 +27,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Browse, search and filters, suggested peers | Done |
 | Session scheduling and weekly calendar | Done |
 | In-app chat with attachments | Done |
-| Study groups with group chat | Done |
+| Study groups with owner approval and group chat | Done |
 | Ratings and session history | Done |
 
 ## Database
@@ -37,7 +37,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 - `user_skills`: id, user_id (links to profiles), skill_id (links to skills), type (`teach` or `learn`)
 - `sessions`: id, requester_id and partner_id (both link to profiles), skill_id, starts_at, ends_at, location, note, status (`pending`, `accepted`, `declined`, `cancelled`). Created by `database/sessions.sql`.
 - `messages`: id, sender_id and recipient_id (both link to profiles), body, file_path, file_name, file_type. Created by `database/chat.sql`, which also sets up the private `chat-attachments` storage bucket.
-- `study_groups`: id, owner_id (links to profiles), name, description, skill_id, max_members. `group_members`: group_id, user_id (one row per member). `group_messages`: id, group_id, sender_id, body. Created by `database/groups.sql`.
+- `study_groups`: id, owner_id (links to profiles), name, description, skill_id, max_members. `group_members`: group_id, user_id (one row per member). `group_join_requests`: id, group_id, user_id (a pending request). `group_messages`: id, group_id, sender_id, body. Created by `database/groups.sql`.
 - `ratings`: id, session_id (links to sessions), rater_id and ratee_id (both link to profiles), stars (1 to 5), comment. Created by `database/ratings.sql`.
 
 ## Matching
@@ -73,12 +73,13 @@ These rules are enforced in the database (`database/chat.sql`):
 
 ## Study groups
 
-Any student can create a group (name, subject, description, size limit), browse and search groups, and join or leave them. A group page shows its members and a group chat that updates live through Supabase Realtime. The creator leads the group and can delete it.
+Any student can create a group (name, subject, description, size limit) and browse and search groups. Nobody can join on their own: a student sends a join request, and only the group's owner can approve or decline it. A group page shows its members and a group chat that updates live through Supabase Realtime, and the chat is visible to members only. The owner approves requests, can remove members, and can delete the group.
 
 These rules are enforced in the database (`database/groups.sql`):
 
 - Students create groups as themselves, and only the owner can edit or delete a group.
-- Students join and leave as themselves. A full group can't be joined, and the owner can't leave without deleting the group.
+- Joining needs the owner's approval: a student can only create a request for themselves, and only the owner can add a student who has a pending request. A full group takes no more members.
+- Members can leave. The owner can remove other members but can't leave without deleting the group.
 - Only members can read or post in a group's chat, and only as themselves.
 
 ## Ratings and session history
@@ -98,12 +99,13 @@ CRUD in the app: create and delete skill tags, read the catalog and tags, update
 Create a Supabase project, then prepare the database in this order (SQL Editor, or the dashboard forms where noted):
 
 1. `database/setup.sql`: the `profiles`, `skills` and `user_skills` tables with their row level security policies (the app creates each profile row at registration, so no sign-up trigger is needed). Then import `database/skills.csv` into `skills`.
-2. `database/constraints.sql`: blocks duplicate skill tags (optional safeguard).
+2. `database/constraints.sql`: blocks duplicate skill tags and enforces text length limits (optional safeguards).
 3. `database/sessions.sql`: sessions table and policies.
 4. `database/chat.sql`: messages table, the private `chat-attachments` bucket and its policies.
-5. `database/groups.sql`: study group tables and policies.
+5. `database/groups.sql`: study group tables, join requests and policies. (If you ran an earlier version of this file, run `database/groups-approval.sql` instead to add join approval.)
 6. `database/ratings.sql`: ratings table and policies.
-7. Optional: `database/demo-classmates.sql` creates demo classmates for testing (follow the steps at the top of that file).
+7. `database/hardening.sql`: stops the sessions rules function from being called directly through the API (a Supabase Security Advisor warning).
+8. Optional: `database/demo-classmates.sql` creates demo classmates for testing (follow the steps at the top of that file).
 
 Notes from setting this up on the Supabase dashboard:
 
@@ -124,6 +126,22 @@ Notes from setting this up on the Supabase dashboard:
 4. Deploy. Every push to `main` redeploys automatically.
 5. In Supabase, set the Site URL and Redirect URLs to the Vercel address.
 
+## Security
+
+Access control lives in the database, not only in the pages: every table has row level security, so the rules hold even if someone calls the API directly. Summary of what is enforced and how:
+
+- **Authentication:** Supabase Auth. Passwords are hashed by Supabase and need at least 8 characters on the registration form. Pages are guarded in the app, and the database refuses data to signed-out users.
+- **Privacy:** messages are readable only by the two people in them. Attachments are in a private storage bucket and opened with temporary signed links. Group chats are readable only by members, and joining a group needs the owner's approval.
+- **Impersonation:** every insert policy checks `auth.uid()`, so a student can only create sessions, messages, ratings, requests and tags as themselves.
+- **Input limits:** text lengths, star range, file size (5 MB) and file types are checked in the forms and again in the database.
+- **Secrets:** only the public (publishable) Supabase key is in the frontend. The secret key is never used, `.env` is not committed, and no secret appears in the git history.
+- **Browser protection:** `vercel.json` sets a Content Security Policy, which only allows scripts from the site itself and connections to Supabase, plus anti-clickjacking, no-sniff, referrer and permissions headers. The app never inserts raw HTML, so React escapes all user text.
+- **Dependencies:** `npm audit` reports two moderate advisories in React Router 6 (an open redirect through crafted link targets, and a server-rendering issue). Neither applies here: all links use internal paths built from database ids, and the app has no server rendering. The fix is a major upgrade to React Router 7, which is planned for later.
+
+The Supabase Security Advisor reports no errors. Its remaining warning, "Leaked Password Protection Disabled", is a setting that, as far as I know, needs a paid Supabase plan, so it is left off on the free plan.
+
+Recommended Supabase dashboard settings: raise the minimum password length to 8 (Authentication > Providers > Email), turn on email confirmation for a real launch (it is off for the demo accounts), and run the Security Advisor (Advisors > Security) after any schema change.
+
 ## Accessibility and responsive design
 
 - Every form field has a visible label, and error messages use `role="alert"`.
@@ -138,6 +156,7 @@ Notes from setting this up on the Supabase dashboard:
 - Ratings can't be edited or deleted after sending, by design.
 - Chat attachments are limited to 5 MB and to images, PDF, Word, PowerPoint and text files.
 - Group chat is text only, and the group owner can't hand the group to another member.
+- Member names of a group are visible to signed-in students, as every profile is, because matching needs it. Only the group chat content is private.
 
 ## Git workflow
 

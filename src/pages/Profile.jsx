@@ -149,11 +149,11 @@ export default function Profile() {
             <div className="grid gap-5 sm:grid-cols-3">
               <div className="sm:col-span-1">
                 <label htmlFor="full_name" className="field-label">Full name</label>
-                <input id="full_name" required className="field" value={form.full_name} onChange={set('full_name')} />
+                <input id="full_name" required className="field" value={form.full_name} onChange={set('full_name')} maxLength={100} />
               </div>
               <div>
                 <label htmlFor="course" className="field-label">Course</label>
-                <input id="course" required className="field" value={form.course} onChange={set('course')} />
+                <input id="course" required className="field" value={form.course} onChange={set('course')} maxLength={100} />
               </div>
               <div>
                 <label htmlFor="year_level" className="field-label">Year level</label>

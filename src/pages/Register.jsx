@@ -61,13 +61,13 @@ export default function Register() {
           <div>
             <label htmlFor="full_name" className="field-label">Full name</label>
             <input id="full_name" required autoComplete="name" className="field"
-              value={form.full_name} onChange={set('full_name')} />
+              value={form.full_name} onChange={set('full_name')} maxLength={100} />
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="course" className="field-label">Course</label>
               <input id="course" required placeholder="e.g. BSCpE" className="field"
-                value={form.course} onChange={set('course')} />
+                value={form.course} onChange={set('course')} maxLength={100} />
             </div>
             <div>
               <label htmlFor="year_level" className="field-label">Year level</label>
@@ -85,9 +85,9 @@ export default function Register() {
           </div>
           <div>
             <label htmlFor="password" className="field-label">Password</label>
-            <input id="password" type="password" required minLength={6} autoComplete="new-password"
+            <input id="password" type="password" required minLength={8} autoComplete="new-password"
               className="field" value={form.password} onChange={set('password')} />
-            <p className="mt-1.5 text-sm text-muted-foreground">At least 6 characters.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">At least 8 characters.</p>
           </div>
           {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
           <button type="submit" disabled={busy} className="btn-primary w-full">
