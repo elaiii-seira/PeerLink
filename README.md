@@ -21,7 +21,8 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 
 | Feature | Status |
 |---|---|
-| Register, login, logout, protected pages | Done |
+| Landing page, register, login, logout, protected pages | Done |
+| Forgot and reset password by email | Done |
 | Dashboard | Done |
 | Profile editing, teach/learn tags, availability | Done |
 | Browse, search and filters, suggested peers | Done |
@@ -124,13 +125,13 @@ Notes from setting this up on the Supabase dashboard:
 2. Import it in Vercel (Vite preset is detected).
 3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as environment variables.
 4. Deploy. Every push to `main` redeploys automatically.
-5. In Supabase, set the Site URL and Redirect URLs to the Vercel address.
+5. In Supabase (Authentication > URL Configuration), set the Site URL to the Vercel address and add that address with `/**` at the end (for example `https://your-app.vercel.app/**`) to the Redirect URLs. Password reset emails need this to bring students back to the site.
 
 ## Security
 
 Access control lives in the database, not only in the pages: every table has row level security, so the rules hold even if someone calls the API directly. Summary of what is enforced and how:
 
-- **Authentication:** Supabase Auth. Passwords are hashed by Supabase and need at least 8 characters on the registration form. Pages are guarded in the app, and the database refuses data to signed-out users.
+- **Authentication:** Supabase Auth. Passwords are hashed by Supabase and need at least 8 characters on the registration form. Pages are guarded in the app, and the database refuses data to signed-out users. Password reset sends a one-time link by email, and the page never says whether an account exists for an email address.
 - **Privacy:** messages are readable only by the two people in them. Attachments are in a private storage bucket and opened with temporary signed links. Group chats are readable only by members, and joining a group needs the owner's approval.
 - **Impersonation:** every insert policy checks `auth.uid()`, so a student can only create sessions, messages, ratings, requests and tags as themselves.
 - **Input limits:** text lengths, star range, file size (5 MB) and file types are checked in the forms and again in the database.
@@ -152,6 +153,8 @@ Recommended Supabase dashboard settings: raise the minimum password length to 8 
 
 ## Known limitations
 
+- Password reset emails use Supabase's built-in sender, which allows only a few emails per hour on the free plan. A custom email (SMTP) provider is needed for heavy use.
+
 - Reminders are shown inside the app (dashboard badge within 24 hours). There are no email or push notifications.
 - Ratings can't be edited or deleted after sending, by design.
 - Chat attachments are limited to 5 MB and to images, PDF, Word, PowerPoint and text files.
@@ -167,7 +170,7 @@ Work is done on feature branches (`feature/...`, `fix/...`), opened as pull requ
 ```
 src/
   components/   AuthShell, CreateGroup, PageHeader, PeerCard, ProfileActivity, RateSession, RequestSession, RouteGuards, Stars
-  pages/        Login, Register, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
+  pages/        Landing, Login, Register, ForgotPassword, ResetPassword, Dashboard, Profile, Browse, Sessions, Chat, Groups, GroupDetail
   AuthContext.jsx, supabase.js, options.js, peers.js, sessions.js, chat.js, groups.js, ratings.js
   App.jsx, main.jsx, index.css
 database/       setup (base tables), skills seed data, demo classmates script, constraints, and the sessions, chat, study groups and ratings scripts
