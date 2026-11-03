@@ -30,10 +30,10 @@ function GroupCard({ group, onRequest, busy }) {
       <p className="mt-auto pt-4 text-sm text-muted-foreground">
         <span className="font-semibold text-foreground">{count}/{max_members}</span> members{full && ' · Full'}
       </p>
-      <div className={`mt-3 grid gap-2 ${isMember ? '' : 'grid-cols-2'}`}>
-        <Link to={`/groups/${id}`} className="btn-outline">{isMember ? 'Open' : 'View'}</Link>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link to={`/groups/${id}`} className="btn-outline flex-auto whitespace-nowrap">{isMember ? 'Open' : 'View'}</Link>
         {!isMember && (
-          <button type="button" className="btn-primary py-2" disabled={full || busy || Boolean(myRequest)}
+          <button type="button" className="btn-primary flex-auto whitespace-nowrap" disabled={full || busy || Boolean(myRequest)}
             onClick={() => onRequest(id)}>
             {myRequest ? 'Request sent' : full ? 'Full' : 'Request to join'}
           </button>
@@ -65,10 +65,10 @@ export default function Groups() {
 
   return (
     <div className="min-h-screen">
-      <PageHeader title="Study groups" subtitle="Ask to join a group, or start your own. Group owners approve every new member." />
-      <main id="main" className="mx-auto max-w-5xl px-6 py-10">
+      <PageHeader title="Study groups" subtitle="Ask to join a group, or start your own. Owners approve new members." />
+      <main id="main" className="mx-auto max-w-6xl px-6 py-8">
         <div className="flex flex-wrap items-end gap-4">
-          <div className="min-w-48 flex-1">
+          <div className="w-full sm:w-auto sm:min-w-48 sm:flex-1">
             <label htmlFor="group-search" className="field-label">Search groups</label>
             <input id="group-search" type="search" className="field" value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="Name, subject or description" />
@@ -77,7 +77,7 @@ export default function Groups() {
             <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
             My groups only
           </label>
-          <button type="button" className="btn-primary" onClick={() => setCreating(true)}>Create group</button>
+          <button type="button" className="btn-primary ml-auto" onClick={() => setCreating(true)}>Create group</button>
         </div>
 
         {(error || actionError) && (

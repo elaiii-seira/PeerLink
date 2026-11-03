@@ -82,11 +82,11 @@ export default function PeerCard({ peer, compact = false }) {
         {sharedSlots.length > 0 && ` (${sharedSlots.length} in common with you)`}
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <button type="button" className="btn-outline" onClick={() => setRequesting(true)}>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="button" className="btn-outline flex-auto whitespace-nowrap" onClick={() => setRequesting(true)}>
           Request session
         </button>
-        <Link to={`/chat/${peer.id}`} className="btn-outline">Message</Link>
+        <Link to={`/chat/${peer.id}`} className="btn-outline flex-auto whitespace-nowrap">Message</Link>
       </div>
       {requesting && <RequestSession peer={peer} onClose={() => setRequesting(false)} />}
     </article>
