@@ -26,7 +26,7 @@ export default function Login() {
       subtitle="Welcome back. Pick up where you left off."
       footer={
         <>
-          New to PeerLink?{' '}
+          New to PeerLink - Skill Up?{' '}
           <Link to="/register" className="font-semibold text-foreground underline">
             Create an account
           </Link>

@@ -133,7 +133,7 @@ function Thread({ userId, partnerId }) {
   }
 
   return (
-    <section className={`${card} flex h-[calc(100dvh-19rem)] min-h-[26rem] flex-col md:h-[calc(100vh-14rem)] md:min-h-[32rem]`} aria-label="Conversation">
+    <section className={`${card} flex h-[calc(100dvh-17rem)] min-h-[26rem] flex-col md:h-[calc(100vh-17rem)] md:min-h-[32rem]`} aria-label="Conversation">
       <div className="border-b border-border/25 px-6 py-4">
         <h2 className="text-xl font-semibold">{partner?.full_name ?? 'Loading…'}</h2>
         {partner?.course && <p className="text-sm text-muted-foreground">{partner.course}</p>}
@@ -191,8 +191,8 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen">
-      <PageHeader title="Chat" subtitle="Message classmates to plan sessions and share notes." compact wide />
-      <main id="main" className="mx-auto grid max-w-6xl gap-6 px-6 py-6 md:grid-cols-[20rem_1fr]">
+      <PageHeader title="Chat" subtitle="Message classmates to plan sessions and share notes." />
+      <main id="main" className="mx-auto grid max-w-6xl gap-6 px-6 py-8 md:grid-cols-[20rem_1fr]">
         <div className={partnerId ? 'hidden md:block' : ''}>
           <Inbox userId={user.id} activeId={partnerId} />
         </div>

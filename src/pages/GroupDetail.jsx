@@ -28,7 +28,7 @@ function GroupChat({ groupId, userId }) {
   }
 
   return (
-    <section className="flex h-[75vh] min-h-[30rem] flex-col rounded border border-border/25 bg-card text-card-foreground" aria-labelledby="group-chat-heading">
+    <section className="flex h-[calc(100dvh-20rem)] min-h-[26rem] flex-col rounded border border-border/25 bg-card text-card-foreground lg:h-[calc(100vh-20rem)] lg:min-h-[32rem]" aria-labelledby="group-chat-heading">
       <h2 id="group-chat-heading" className="border-b border-border/25 px-6 py-4 text-xl font-semibold">Group chat</h2>
       <ul ref={list} role="log" aria-live="polite" className="flex-1 space-y-4 overflow-y-auto px-6 py-5 text-base">
         {loading && <li className="text-muted-foreground">Loading messages…</li>}
@@ -92,7 +92,7 @@ export default function GroupDetail() {
     <div className="min-h-screen">
       <PageHeader title={group?.name ?? 'Study group'}
         subtitle={group ? `${group.subject || 'General study'} · led by ${group.owner?.full_name ?? 'a student'}` : ''} />
-      <main id="main" className="mx-auto max-w-5xl space-y-6 px-6 py-10">
+      <main id="main" className="mx-auto max-w-6xl space-y-6 px-6 py-8">
         <Link to="/groups" className="inline-block text-sm font-semibold underline">← All groups</Link>
         {(error || actionError) && <p role="alert" className="text-sm font-semibold text-destructive">{error || actionError}</p>}
 
@@ -101,9 +101,8 @@ export default function GroupDetail() {
         ) : !group ? (
           <p className={`${card} text-muted-foreground`}>This group doesn’t exist any more.</p>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-            <div className="space-y-6">
-              <section className={card} aria-labelledby="about-heading">
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[22rem_1fr] lg:items-start">
+              <section className={`${card} lg:col-start-1`} aria-labelledby="about-heading">
                 <h2 id="about-heading" className="text-xl font-semibold">About</h2>
                 <p className="mt-2 whitespace-pre-wrap text-muted-foreground">{group.description || 'No description yet.'}</p>
                 <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -131,7 +130,7 @@ export default function GroupDetail() {
               </section>
 
               {group.isOwner && (
-                <section className={card} aria-labelledby="requests-heading">
+                <section className={`${card} lg:col-start-1`} aria-labelledby="requests-heading">
                   <h2 id="requests-heading" className="text-xl font-semibold">
                     Join requests{group.requests.length > 0 && ` (${group.requests.length})`}
                   </h2>
@@ -159,16 +158,17 @@ export default function GroupDetail() {
                 </section>
               )}
 
-              {group.isMember ? (
+              <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1">
+                {group.isMember ? (
                 <GroupChat groupId={group.id} userId={user.id} />
               ) : (
                 <p className={`${card} text-muted-foreground`}>
                   The group chat is for members only. Ask to join, and the group leader decides.
                 </p>
               )}
-            </div>
+              </div>
 
-            <section className={`${card} h-fit`} aria-labelledby="members-heading">
+              <section className={`${card} h-fit lg:col-start-1`} aria-labelledby="members-heading">
               <h2 id="members-heading" className="text-xl font-semibold">Members ({group.count}/{group.max_members})</h2>
               <ul className="mt-3">
                 {members.map((m) => (
@@ -194,7 +194,7 @@ export default function GroupDetail() {
                 ))}
               </ul>
             </section>
-          </div>
+            </div>
         )}
       </main>
     </div>

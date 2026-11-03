@@ -1,4 +1,4 @@
-# PeerLink-Skill Up
+# PeerLink - Skill Up
 
 A peer tutoring and skill-swap matching platform for students. Students list what they can teach and what they want to learn, covering academic subjects and practical skills, and are matched with classmates who have complementary needs.
 

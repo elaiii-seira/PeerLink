@@ -47,7 +47,7 @@ export default function Dashboard() {
       <PageHeader title={`Welcome, ${firstName}.`}
         subtitle="Your hub for tutoring, study groups, and skill swaps with classmates." />
 
-      <main id="main" className="mx-auto grid max-w-5xl gap-6 px-6 py-10 lg:grid-cols-[2fr_1fr]">
+      <main id="main" className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <Section title="Upcoming sessions">
             {waiting > 0 && (
