@@ -12,7 +12,7 @@ import {
 const card = 'rounded border border-border/25 bg-card p-6 text-card-foreground'
 const FIRST_HOUR = 7   // calendar shows 7 AM
 const LAST_HOUR = 22   // to 10 PM
-const ROW = 48         // pixels per hour
+const ROW = 56         // pixels per hour
 const HOURS = Array.from({ length: LAST_HOUR - FIRST_HOUR }, (_, i) => FIRST_HOUR + i)
 const hourLabel = (h) => new Date(2000, 0, 1, h).toLocaleTimeString([], { hour: 'numeric' })
 
@@ -201,7 +201,7 @@ export default function Sessions() {
     <div className="min-h-screen">
       <PageHeader title="Sessions" subtitle="Your tutoring requests and weekly schedule." />
 
-      <main id="main" className="mx-auto max-w-5xl space-y-6 px-6 py-10">
+      <main id="main" className="mx-auto max-w-6xl space-y-6 px-6 py-8">
         {(error || actionError) && (
           <p role="alert" className="text-sm font-semibold text-destructive">{error || actionError}</p>
         )}

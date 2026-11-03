@@ -63,7 +63,7 @@ export default function Browse() {
       <PageHeader title="Find classmates"
         subtitle="Search by subject or skill, or start with the people who match your tags." />
 
-      <main id="main" className="mx-auto max-w-5xl space-y-8 px-6 py-10">
+      <main id="main" className="mx-auto max-w-6xl space-y-8 px-6 py-8">
         {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
 
         {!loading && !hasFilters && (
@@ -184,7 +184,7 @@ export default function Browse() {
               )}
             </p>
           ) : (
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {results.map((p) => <PeerCard key={p.id} peer={p} />)}
             </div>
           )}
