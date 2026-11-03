@@ -9,18 +9,17 @@ const navClass = ({ isActive }) =>
       : 'border-transparent text-primary-foreground/70 hover:text-primary-foreground'
   }`
 
-export default function PageHeader({ title, subtitle, compact = false, wide = false }) {
-  const width = wide ? 'max-w-6xl' : 'max-w-5xl'
+export default function PageHeader({ title, subtitle }) {
   const { signOut } = useAuth()
-  useEffect(() => { document.title = `${title} · PeerLink` }, [title])
+  useEffect(() => { document.title = `${title} · PeerLink - Skill Up` }, [title])
   return (
     <header className="bg-primary text-primary-foreground">
       <a href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2 focus:font-semibold focus:text-foreground">
         Skip to main content
       </a>
-      <div className={`mx-auto flex ${width} flex-wrap items-center justify-between gap-4 px-6 py-5`}>
-        <span className="font-heading text-xl font-semibold">PeerLink</span>
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
+        <span className="font-heading text-xl font-semibold">PeerLink - Skill Up</span>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
           <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>
           <NavLink to="/browse" className={navClass}>Browse</NavLink>
@@ -36,9 +35,9 @@ export default function PageHeader({ title, subtitle, compact = false, wide = fa
           </button>
         </nav>
       </div>
-      <div className={`mx-auto ${width} px-6 ${compact ? 'pb-6 pt-1' : 'pb-12 pt-6'}`}>
-        <h1 className={compact ? 'text-3xl font-semibold' : 'text-4xl font-semibold sm:text-5xl'}>{title}</h1>
-        {subtitle && <p className={`mt-3 max-w-xl text-lg text-primary-foreground/80 ${compact ? 'hidden sm:block' : ''}`}>{subtitle}</p>}
+      <div className="mx-auto max-w-6xl px-6 pb-8 pt-2 sm:pb-10">
+        <h1 className="text-3xl font-semibold sm:text-4xl">{title}</h1>
+        {subtitle && <p className="mt-2 hidden max-w-2xl text-lg text-primary-foreground/80 sm:block">{subtitle}</p>}
       </div>
     </header>
   )

@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 
 export default function AuthShell({ title, subtitle, children, footer }) {
-  useEffect(() => { document.title = `${title} · PeerLink` }, [title])
+  useEffect(() => { document.title = `${title} · PeerLink - Skill Up` }, [title])
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <aside className="flex flex-col justify-between bg-primary px-8 py-10 text-primary-foreground lg:px-14 lg:py-14">
-        <p className="font-heading text-2xl font-semibold">PeerLink</p>
+        <p className="font-heading text-2xl font-semibold">PeerLink - Skill Up</p>
         <div className="my-10 max-w-md lg:my-0">
           <h2 className="text-4xl font-semibold leading-tight lg:text-5xl">
             Teach what you know. Learn what you don’t.
