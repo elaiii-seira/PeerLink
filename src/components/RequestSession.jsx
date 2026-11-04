@@ -41,7 +41,7 @@ export default function RequestSession({ peer, onClose }) {
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="request-title"
-      className="w-[min(32rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-foreground/50">
+      className="w-[min(32rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-black/60">
       <div className="p-6">
         <h2 id="request-title" className="text-2xl font-semibold">Request a session</h2>
         <p className="mt-1 text-muted-foreground">with {peer.full_name}</p>

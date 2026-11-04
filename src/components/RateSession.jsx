@@ -26,7 +26,7 @@ export default function RateSession({ session, onClose, onDone }) {
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="rate-title"
-      className="w-[min(28rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-foreground/50">
+      className="w-[min(28rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-black/60">
       <form onSubmit={submit} className="space-y-4 p-6">
         <div>
           <h2 id="rate-title" className="text-2xl font-semibold">Rate your session</h2>
