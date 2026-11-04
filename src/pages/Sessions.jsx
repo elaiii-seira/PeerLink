@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import PageHeader from '../components/PageHeader'
@@ -12,7 +12,7 @@ import {
 const card = 'rounded border border-border/25 bg-card p-6 text-card-foreground'
 const FIRST_HOUR = 7   // calendar shows 7 AM
 const LAST_HOUR = 22   // to 10 PM
-const ROW = 56         // pixels per hour
+const ROW = 40         // pixels per hour
 const HOURS = Array.from({ length: LAST_HOUR - FIRST_HOUR }, (_, i) => FIRST_HOUR + i)
 const hourLabel = (h) => new Date(2000, 0, 1, h).toLocaleTimeString([], { hour: 'numeric' })
 
@@ -48,14 +48,13 @@ function Block({ s, lane, lanes }) {
   return (
     <div title={`${s.skill} with ${s.other.full_name}, ${fmtTime(s.start)}–${fmtTime(s.end)}${pending ? ' (pending)' : ''}`}
       style={{ top, height: Math.max(bottom - top, 22), left: `${(lane / lanes) * 100}%`, width: `${100 / lanes}%` }}
-      className={`absolute overflow-hidden rounded border px-1.5 py-1 text-xs leading-tight ${
+      className={`absolute overflow-hidden rounded border px-1.5 py-0.5 text-[11px] leading-tight ${
         pending
           ? 'border-dashed border-primary bg-card text-foreground'
           : 'border-primary bg-primary text-primary-foreground'
       }`}>
       <p className="truncate font-semibold">{fmtTime(s.start)}</p>
-      <p className="truncate">{s.skill}</p>
-      <p className="truncate opacity-80">{s.other.full_name}</p>
+      <p className="truncate">{s.skill} · {s.other.full_name.split(' ')[0]}</p>
     </div>
   )
 }
@@ -69,6 +68,13 @@ function WeekCalendar({ sessions }) {
   )
   const forDay = (day) => shown.filter((s) => sameDay(s.start, day))
   const today = new Date()
+
+  // The grid scrolls inside a short window. Open it at the first session of the week (or 8 AM).
+  const scroller = useRef(null)
+  const firstHour = shown.length ? Math.min(...shown.map((s) => s.start.getHours())) : 8
+  useEffect(() => {
+    if (scroller.current) scroller.current.scrollTop = (Math.min(Math.max(firstHour - 1, FIRST_HOUR), 13) - FIRST_HOUR) * ROW
+  }, [weekStart, firstHour])
 
   return (
     <section className={card} aria-labelledby="calendar-heading">
@@ -86,9 +92,9 @@ function WeekCalendar({ sessions }) {
         Solid blocks are confirmed. Dashed blocks are requests still waiting for an answer.
       </p>
 
-      {/* Grid on wider screens */}
-      <div className="mt-5 hidden md:block">
-        <div className="grid grid-cols-[3.5rem_repeat(7,1fr)] border-b border-border/25 pb-2 text-sm">
+      {/* Grid on wider screens: a short window that scrolls, with the day names kept in view */}
+      <div ref={scroller} className="mt-4 hidden max-h-[24rem] overflow-y-auto md:block">
+        <div className="sticky top-0 z-10 grid grid-cols-[3.5rem_repeat(7,1fr)] border-b border-border/25 bg-card pb-2 text-sm">
           <span />
           {days.map((d) => (
             <span key={d} className={`text-center font-semibold ${sameDay(d, today) ? 'text-foreground' : 'text-muted-foreground'}`}>
@@ -99,7 +105,7 @@ function WeekCalendar({ sessions }) {
             </span>
           ))}
         </div>
-        <div className="grid grid-cols-[3.5rem_repeat(7,1fr)]">
+        <div className="grid grid-cols-[3.5rem_repeat(7,1fr)] pt-2">
           <div>
             {HOURS.map((h) => (
               <div key={h} style={{ height: ROW }} className="-translate-y-2 pr-2 text-right text-xs text-muted-foreground">
@@ -209,7 +215,32 @@ export default function Sessions() {
           <p className="text-muted-foreground">Loading sessions…</p>
         ) : (
           <>
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start">
+              <div className="order-2 space-y-6 lg:order-1">
+                <WeekCalendar sessions={sessions} />
+                    <section className={card} aria-labelledby="past-heading">
+                      <h2 id="past-heading" className="text-xl font-semibold">Past sessions</h2>
+                      {past.length === 0 ? (
+                        <p className="mt-2 text-muted-foreground">Finished sessions will appear here so you can rate them.</p>
+                      ) : (
+                        <ul className="mt-4">
+                          {past.map((s) => (
+                            <Item key={s.id} actions={
+                              given.has(s.id) ? (
+                                <p className="text-sm text-muted-foreground">You rated <Stars value={given.get(s.id)} /></p>
+                              ) : (
+                                <button className="btn-outline" onClick={() => setRating(s)}>
+                                  Rate {s.other.full_name.split(' ')[0]}
+                                </button>
+                              )}>
+                              <Details s={s} />
+                            </Item>
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+              </div>
+              <div className="order-1 space-y-6 lg:order-2">
               <section className={card} aria-labelledby="incoming-heading">
                 <h2 id="incoming-heading" className="text-xl font-semibold">Requests for you</h2>
                 {incoming.length === 0 ? (
@@ -242,47 +273,26 @@ export default function Sessions() {
                   </ul>
                 )}
               </section>
+
+                <section className={card} aria-labelledby="upcoming-heading">
+                  <h2 id="upcoming-heading" className="text-xl font-semibold">Upcoming confirmed sessions</h2>
+                  {next.length === 0 ? (
+                    <p className="mt-2 text-muted-foreground">Nothing confirmed yet.</p>
+                  ) : (
+                    <ul className="mt-4">
+                      {next.map((s) => (
+                        <Item key={s.id} actions={<>{messageLink(s)}{button(s, 'cancelled', 'Cancel')}</>}>
+                          <Details s={s} />
+                          <p className="mt-1 text-sm font-semibold">Starts {startsIn(s.start)}</p>
+                        </Item>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+              </div>
             </div>
 
-            <WeekCalendar sessions={sessions} />
-
-            <section className={card} aria-labelledby="upcoming-heading">
-              <h2 id="upcoming-heading" className="text-xl font-semibold">Upcoming confirmed sessions</h2>
-              {next.length === 0 ? (
-                <p className="mt-2 text-muted-foreground">Nothing confirmed yet.</p>
-              ) : (
-                <ul className="mt-4">
-                  {next.map((s) => (
-                    <Item key={s.id} actions={<>{messageLink(s)}{button(s, 'cancelled', 'Cancel')}</>}>
-                      <Details s={s} />
-                      <p className="mt-1 text-sm font-semibold">Starts {startsIn(s.start)}</p>
-                    </Item>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            <section className={card} aria-labelledby="past-heading">
-              <h2 id="past-heading" className="text-xl font-semibold">Past sessions</h2>
-              {past.length === 0 ? (
-                <p className="mt-2 text-muted-foreground">Finished sessions will appear here so you can rate them.</p>
-              ) : (
-                <ul className="mt-4">
-                  {past.map((s) => (
-                    <Item key={s.id} actions={
-                      given.has(s.id) ? (
-                        <p className="text-sm text-muted-foreground">You rated <Stars value={given.get(s.id)} /></p>
-                      ) : (
-                        <button className="btn-outline" onClick={() => setRating(s)}>
-                          Rate {s.other.full_name.split(' ')[0]}
-                        </button>
-                      )}>
-                      <Details s={s} />
-                    </Item>
-                  ))}
-                </ul>
-              )}
-            </section>
           </>
         )}
       </main>

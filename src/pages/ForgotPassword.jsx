@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import AuthShell from '../components/AuthShell'
+import IconField from '../components/IconField'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -43,13 +44,10 @@ export default function ForgotPassword() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="field-label">Email</label>
-            <input id="email" type="email" required autoComplete="email" className="field"
-              value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
+          <IconField id="email" label="Email" icon="mail" type="email" required autoComplete="email"
+            placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
-          <button type="submit" disabled={busy} className="btn-primary w-full">
+          <button type="submit" disabled={busy} className="btn-primary w-full py-3 text-base">
             {busy ? 'Sending…' : 'Send reset link'}
           </button>
         </form>

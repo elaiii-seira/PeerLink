@@ -17,7 +17,28 @@
     --ring: 15 23 42;                   /* #0F172A */
     --destructive: 185 28 28;           /* #B91C1C, only for errors */
     --destructive-foreground: 255 255 255;
+    --chrome: 30 41 59;                 /* #1E293B, page header */
+    --chrome-foreground: 255 255 255;
     --radius: 0.5rem;
+    color-scheme: light;
+  }
+
+  .dark {
+    --background: 15 23 42;             /* #0F172A */
+    --foreground: 241 245 249;          /* #F1F5F9 */
+    --card: 30 41 59;                   /* #1E293B */
+    --card-foreground: 241 245 249;
+    --primary: 226 232 240;             /* #E2E8F0, light buttons and badges on dark */
+    --primary-foreground: 15 23 42;
+    --muted: 51 65 85;                  /* #334155 */
+    --muted-foreground: 148 163 184;    /* #94A3B8 */
+    --border: 148 163 184;
+    --ring: 226 232 240;
+    --destructive: 248 113 113;         /* lighter red so errors stay readable */
+    --destructive-foreground: 15 23 42;
+    --chrome: 2 6 23;                   /* #020617 */
+    --chrome-foreground: 255 255 255;
+    color-scheme: dark;
   }
 
   body {

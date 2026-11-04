@@ -22,6 +22,7 @@ A peer tutoring and skill-swap matching platform for students. Students list wha
 | Feature | Status |
 |---|---|
 | Landing page, register, login, logout, protected pages | Done |
+| Light and dark mode (toggle on every page, choice is remembered) | Done |
 | Forgot and reset password by email | Done |
 | Dashboard | Done |
 | Profile editing, teach/learn tags, availability | Done |
@@ -143,13 +144,26 @@ The Supabase Security Advisor reports no errors. Its remaining warning, "Leaked 
 
 Recommended Supabase dashboard settings: raise the minimum password length to 8 (Authentication > Providers > Email), turn on email confirmation for a real launch (it is off for the demo accounts), and run the Security Advisor (Advisors > Security) after any schema change.
 
+## Dark mode and sign-in
+
+A sun/moon button on every page switches between light and dark mode. The choice is saved in the browser, and the first visit follows the device setting. The colours are design tokens in `src/index.css` (`:root` for light, `.dark` for dark), so every component follows the theme. A small script (`public/theme.js`) applies the saved theme before the page paints, so there is no flash. It is a separate file because the Content Security Policy blocks inline scripts.
+
+The home page (`/`), log in (`/login`) and register (`/register`) are separate pages. Visitors who are not signed in see the home page, and signed-in students go straight to the dashboard.
+
+**Continue with Google (optional).** The button is hidden until Google sign-in is set up:
+1. In Google Cloud Console, create an OAuth client (type Web application) and add the callback URL shown in Supabase under Authentication > Sign In / Providers > Google.
+2. Paste the client ID and secret into Supabase (Authentication > Sign In / Providers > Google) and turn the provider on.
+3. Set `VITE_ENABLE_GOOGLE_LOGIN=true` in Vercel (Settings > Environment Variables) and redeploy.
+
+Students who sign up with Google can add their course and year level on the Profile page.
+
 ## Accessibility and responsive design
 
 - Every form field has a visible label, and error messages use `role="alert"`.
 - A "Skip to main content" link appears on keyboard focus, and each page sets its own title.
 - Pop-ups use the native `<dialog>` element, which traps focus and closes with Escape. Chats announce new messages to screen readers.
 - Buttons and links have visible focus rings, and colours come from one palette with enough contrast.
-- Layouts work on phones: the navigation wraps, the weekly calendar becomes a day list, and the chat list and thread switch between screens.
+- Layouts work on phones: the navigation wraps, the weekly calendar becomes a day list (on larger screens it is a short window that scrolls, next to the requests), and the chat list and thread switch between screens.
 
 ## Known limitations
 

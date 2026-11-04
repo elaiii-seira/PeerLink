@@ -32,7 +32,7 @@ export default function CreateGroup({ userId, onClose }) {
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="create-group-title"
-      className="w-[min(32rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-foreground/50">
+      className="w-[min(32rem,calc(100%-2rem))] rounded bg-card p-0 text-card-foreground backdrop:bg-black/60">
       <form onSubmit={submit} className="space-y-4 p-6">
         <h2 id="create-group-title" className="text-2xl font-semibold">Create a study group</h2>
         <div>

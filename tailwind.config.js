@@ -18,6 +18,8 @@ export default {
         ring: token('ring'),
         destructive: token('destructive'),
         'destructive-foreground': token('destructive-foreground'),
+        chrome: token('chrome'),
+        'chrome-foreground': token('chrome-foreground'),
       },
       fontFamily: {
         heading: ['"Playfair Display"', 'Georgia', 'serif'],
