@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-
-const BRAND = 'PeerLink - Skill Up'
+import Brand, { BRAND } from '../components/Brand'
+import ThemeToggle from '../components/ThemeToggle'
 
 function SearchIcon() {
   return (
@@ -37,20 +37,15 @@ export default function Landing() {
         Skip to main content
       </a>
 
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
-        <Link to="/" className="flex items-center gap-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <span aria-hidden="true"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
-            PL
-          </span>
-          <span className="text-lg font-bold">{BRAND}</span>
-        </Link>
-        <nav className="flex items-center gap-3 sm:gap-5" aria-label="Account">
+      <header className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5">
+        <Brand />
+        <nav className="ml-auto flex items-center gap-2 sm:gap-5" aria-label="Account">
+          <ThemeToggle />
           <Link to="/login"
-            className="rounded px-1 font-semibold text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            className="whitespace-nowrap rounded px-1 font-semibold text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             Log in
           </Link>
-          <Link to="/register" className={`${pill} bg-primary px-5 py-2.5 text-primary-foreground hover:bg-foreground`}>
+          <Link to="/register" className={`${pill} whitespace-nowrap bg-primary !px-4 !py-2 text-primary-foreground hover:bg-foreground sm:!px-5 sm:!py-2.5`}>
             Sign up
           </Link>
         </nav>

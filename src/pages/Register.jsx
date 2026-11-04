@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import AuthShell from '../components/AuthShell'
+import GoogleAuth from '../components/GoogleAuth'
+import IconField from '../components/IconField'
 import { YEAR_LEVELS } from '../options'
 
 export default function Register() {
@@ -57,43 +59,31 @@ export default function Register() {
       {notice ? (
         <p role="status" className="rounded border border-border/40 bg-card p-4 text-foreground">{notice}</p>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="full_name" className="field-label">Full name</label>
-            <input id="full_name" required autoComplete="name" className="field"
-              value={form.full_name} onChange={set('full_name')} maxLength={100} />
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="course" className="field-label">Course</label>
-              <input id="course" required placeholder="e.g. BSCpE" className="field"
-                value={form.course} onChange={set('course')} maxLength={100} />
-            </div>
-            <div>
-              <label htmlFor="year_level" className="field-label">Year level</label>
-              <select id="year_level" required className="field"
+        <>
+          <GoogleAuth label="Sign up with Google" />
+          <form onSubmit={onSubmit} className="space-y-5">
+            <IconField id="full_name" label="Full name" icon="user" required maxLength={100} autoComplete="name"
+              placeholder="Juan Dela Cruz" value={form.full_name} onChange={set('full_name')} />
+            <div className="grid gap-5 sm:grid-cols-2">
+              <IconField id="course" label="Course" icon="book" required maxLength={100}
+                placeholder="BSCpE" value={form.course} onChange={set('course')} />
+              <IconField id="year_level" label="Year level" icon="calendar" as="select" required
                 value={form.year_level} onChange={set('year_level')}>
                 <option value="" disabled>Select</option>
                 {YEAR_LEVELS.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              </IconField>
             </div>
-          </div>
-          <div>
-            <label htmlFor="email" className="field-label">Email</label>
-            <input id="email" type="email" required autoComplete="email" className="field"
-              value={form.email} onChange={set('email')} />
-          </div>
-          <div>
-            <label htmlFor="password" className="field-label">Password</label>
-            <input id="password" type="password" required minLength={8} autoComplete="new-password"
-              className="field" value={form.password} onChange={set('password')} />
-            <p className="mt-1.5 text-sm text-muted-foreground">At least 8 characters.</p>
-          </div>
-          {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
-          <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? 'Creating account…' : 'Create account'}
-          </button>
-        </form>
+            <IconField id="email" label="Email" icon="mail" type="email" required autoComplete="email"
+              placeholder="you@example.com" value={form.email} onChange={set('email')} />
+            <IconField id="password" label="Password" icon="lock" type="password" required minLength={8}
+              autoComplete="new-password" placeholder="At least 8 characters" hint="At least 8 characters."
+              value={form.password} onChange={set('password')} />
+            {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
+            <button type="submit" disabled={busy} className="btn-primary w-full py-3 text-base">
+              {busy ? 'Creating account…' : 'Create account'}
+            </button>
+          </form>
+        </>
       )}
     </AuthShell>
   )

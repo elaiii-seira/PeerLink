@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabase'
 import AuthShell from '../components/AuthShell'
+import IconField from '../components/IconField'
 
 // The link in the reset email signs the student in for a moment (Supabase reads the link),
 // so this page just asks for a new password while that session exists.
@@ -27,7 +28,7 @@ export default function ResetPassword() {
   }
 
   if (loading) {
-    return <AuthShell title="Reset your password" subtitle="Checking your link…" footer={null}>{null}</AuthShell>
+    return <AuthShell title="Reset your password" subtitle="One moment." footer={null}><p role="status" className="text-center text-muted-foreground">Checking your link…</p></AuthShell>
   }
 
   if (!user) {
@@ -56,19 +57,14 @@ export default function ResetPassword() {
   return (
     <AuthShell title="Choose a new password" subtitle="Pick something you have not used elsewhere." footer={null}>
       <form onSubmit={onSubmit} className="space-y-5">
-        <div>
-          <label htmlFor="password" className="field-label">New password</label>
-          <input id="password" type="password" required minLength={8} autoComplete="new-password" className="field"
-            value={password} onChange={(e) => setPassword(e.target.value)} />
-          <p className="mt-1.5 text-sm text-muted-foreground">At least 8 characters.</p>
-        </div>
-        <div>
-          <label htmlFor="confirm" className="field-label">Confirm new password</label>
-          <input id="confirm" type="password" required minLength={8} autoComplete="new-password" className="field"
-            value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-        </div>
+        <IconField id="password" label="New password" icon="lock" type="password" required minLength={8}
+          autoComplete="new-password" placeholder="At least 8 characters" hint="At least 8 characters."
+          value={password} onChange={(e) => setPassword(e.target.value)} />
+        <IconField id="confirm" label="Confirm new password" icon="lock" type="password" required minLength={8}
+          autoComplete="new-password" placeholder="Type it again" value={confirm}
+          onChange={(e) => setConfirm(e.target.value)} />
         {error && <p role="alert" className="text-sm font-semibold text-destructive">{error}</p>}
-        <button type="submit" disabled={busy} className="btn-primary w-full">
+        <button type="submit" disabled={busy} className="btn-primary w-full py-3 text-base">
           {busy ? 'Saving…' : 'Update password'}
         </button>
       </form>
